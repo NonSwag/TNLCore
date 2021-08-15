@@ -1,0 +1,15 @@
+{
+  "no-permission": "%prefix%§c Darauf hast du keine Rechte §8(§4%permission%§8)",
+  "unknown-command": "%prefix%§c Der Command §8(§4%command%§8)§c existiert nicht",
+  "disabled-command": "%prefix%§c Der Command §8(§4%command%§8)§c ist deaktiviert",
+  "player-command": "%prefix%§c Das ist ein spieler command",
+  "console-command": "%prefix%§c Das ist ein konsolen command",
+  "kicked": "%prefix% §cDu wurdest gekickt%nl%§4%reason%",
+  "first-join-message": "%prefix%%color_1% %player%%color_2% ist dem server beigetreten §8(§7zum ersten mal§8)",
+  "join-message": "%prefix%%color_1% %player%%color_2% ist dem server beigetreten",
+  "quit-message": "%prefix%§4 %player%§c hat den server verlassen",
+  "world-saved": "%prefix%%color_2% Die welt %color_1%%world%%color_2% wurde gespeichert",
+  "changed-gamemode": "%prefix%%color_2% Dein gamemode ist jetzt %color_1%%gamemode%",
+  "player-not-online": "%prefix%§4 %player%§c ist nicht online",
+  "not-a-player": "%prefix%§4 %player%§c ist kein spieler"
+}
