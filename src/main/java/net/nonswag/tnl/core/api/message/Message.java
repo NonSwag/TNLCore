@@ -1,9 +1,10 @@
 package net.nonswag.tnl.core.api.message;
 
 import com.google.gson.JsonElement;
-import net.nonswag.tnl.core.api.config.JsonConfig;
-import net.nonswag.tnl.core.api.message.language.Language;
-import net.nonswag.tnl.core.api.message.language.LanguageKey;
+import net.nonswag.tnl.core.api.file.formats.JsonFile;
+import net.nonswag.tnl.core.api.language.Language;
+import net.nonswag.tnl.core.api.language.LanguageKey;
+import net.nonswag.tnl.core.api.language.MessageKey;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,6 +28,8 @@ public abstract class Message {
     @Nonnull
     public static final ChatComponent CHAT_FORMAT = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.CHAT_FORMAT), "§8[%color%%world%§8] §f%display_name% §8» %color%%message%");
     @Nonnull
+    public static final ChatComponent CHAT_MENTION = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.CHAT_MENTION), "§8(§3%player%§8) %color%");
+    @Nonnull
     public static final ChatComponent ITEM_NAME_STANDARD = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.ITEM_NAME_STANDARD), "§8* §3%item_name%");
     @Nonnull
     public static final ChatComponent ITEM_NAME_RARE = new ChatComponent(new LanguageKey(Language.ROOT, MessageKey.ITEM_NAME_RARE), "§8* §5%item_name%");
@@ -40,7 +43,9 @@ public abstract class Message {
     @Nonnull
     public static final ChatComponent COMMAND_ERROR_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.COMMAND_ERROR), "%prefix%§c Failed to execute command §8(§4%command%§8)");
     @Nonnull
-    public static final ChatComponent DISABLED_COMMAND_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.DISABLED_COMMAND), "%prefix%§c The Command §8(§4%command%§8)§c is disabled");
+    public static final ChatComponent TAB_COMPLETE_ERROR_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.TAB_COMPLETE_ERROR), "%prefix%§c Failed to create suggestions §8(§4%command%§8)");
+    @Nonnull
+    public static final ChatComponent CHAT_ERROR_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.CHAT_ERROR), "%prefix%§c Failed to send message");
     @Nonnull
     public static final ChatComponent UNKNOWN_COMMAND_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.UNKNOWN_COMMAND), "%prefix%§c The Command §8(§4%command%§8)§c doesn't exist");
     @Nonnull
@@ -63,15 +68,25 @@ public abstract class Message {
     public static final ChatComponent PLAYER_NOT_ONLINE_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.PLAYER_NOT_ONLINE), "%prefix%§4 %player%§c is not online");
     @Nonnull
     public static final ChatComponent NOT_A_PLAYER_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.NOT_A_PLAYER), "%prefix%§4 %player%§c is not a player");
+    @Nonnull
+    public static final ChatComponent CONNECTING_TO_SERVER_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.CONNECTING_TO_SERVER), "%prefix% §a%color_2%Connecting you to server %color_1%%server%");
+    @Nonnull
+    public static final ChatComponent UNKNOWN_SERVER_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.UNKNOWN_SERVER), "%prefix% §cThe server §4%server%§c doesn't exist");
+    @Nonnull
+    public static final ChatComponent FAILED_TO_CONNECT_TO_SERVER_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.FAILED_TO_CONNECT_TO_SERVER), "%prefix% §cFailed to connect you to server §4%server%");
+    @Nonnull
+    public static final ChatComponent SERVER_IS_OFFLINE_EN = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.SERVER_IS_OFFLINE), "%prefix% §cThe server §4%server%§c is Offline");
 
     @Nonnull
     public static final ChatComponent NO_PERMISSION_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.NO_PERMISSION), "%prefix%§c Darauf hast du keine Rechte §8(§4%permission%§8)");
     @Nonnull
-    public static final ChatComponent COMMAND_ERROR_DE = new ChatComponent(new LanguageKey(Language.AMERICAN_ENGLISH, MessageKey.COMMAND_ERROR), "%prefix%§c Fehler beim ausführen des Commands §8(§4%command%§8)");
+    public static final ChatComponent COMMAND_ERROR_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.COMMAND_ERROR), "%prefix%§c Fehler beim ausführen des Commands §8(§4%command%§8)");
+    @Nonnull
+    public static final ChatComponent TAB_COMPLETE_ERROR_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.TAB_COMPLETE_ERROR), "%prefix%§c Fehler beim erstellen der vorschläge §8(§4%command%§8)");
+    @Nonnull
+    public static final ChatComponent CHAT_ERROR_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.CHAT_ERROR), "%prefix%§c Fehler beim senden der nachricht");
     @Nonnull
     public static final ChatComponent UNKNOWN_COMMAND_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.UNKNOWN_COMMAND), "%prefix%§c Der Command §8(§4%command%§8)§c existiert nicht");
-    @Nonnull
-    public static final ChatComponent DISABLED_COMMAND_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.DISABLED_COMMAND), "%prefix%§c Der Command §8(§4%command%§8)§c ist deaktiviert");
     @Nonnull
     public static final ChatComponent PLAYER_COMMAND_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.PLAYER_COMMAND), "%prefix%§c Das ist ein spieler command");
     @Nonnull
@@ -92,6 +107,14 @@ public abstract class Message {
     public static final ChatComponent PLAYER_NOT_ONLINE_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.PLAYER_NOT_ONLINE), "%prefix%§4 %player%§c ist nicht online");
     @Nonnull
     public static final ChatComponent NOT_A_PLAYER_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.NOT_A_PLAYER), "%prefix%§4 %player%§c ist kein spieler");
+    @Nonnull
+    public static final ChatComponent CONNECTING_TO_SERVER_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.CONNECTING_TO_SERVER), "%prefix% %color_2%Verbinde dich zum server %color_1%%server%");
+    @Nonnull
+    public static final ChatComponent UNKNOWN_SERVER_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.UNKNOWN_SERVER), "%prefix% §cDer server §4%server%§c existiert nicht");
+    @Nonnull
+    public static final ChatComponent FAILED_TO_CONNECT_TO_SERVER_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.FAILED_TO_CONNECT_TO_SERVER), "%prefix% §cDu konntest nicht zum server §4%server%§c verbunden werden");
+    @Nonnull
+    public static final ChatComponent SERVER_IS_OFFLINE_DE = new ChatComponent(new LanguageKey(Language.GERMAN, MessageKey.SERVER_IS_OFFLINE), "%prefix% §cDer server §4%server% ist Offline");
 
     private Message() {
     }
@@ -99,30 +122,28 @@ public abstract class Message {
     @Nullable
     public static ChatComponent valueOf(@Nonnull LanguageKey languageKey) {
         for (ChatComponent message : ChatComponent.getMessages()) {
-            if (message.getLanguageKey().equals(languageKey)) {
-                return message;
-            }
+            if (message.getLanguageKey().equals(languageKey)) return message;
         }
         return null;
     }
 
     public static void init() {
         for (Language language : Language.getLanguages()) {
-            JsonConfig jsonConfig = new JsonConfig("Listener/Messages/", language.getFile());
+            JsonFile jsonFile = new JsonFile("plugins/Listener/Messages/", language.getFile());
             for (MessageKey key : MessageKey.getKeys()) {
                 if ((key.isSystemMessage() && !language.equals(Language.ROOT)) || (!key.isSystemMessage() && language.equals(Language.ROOT))) {
                     continue;
                 }
                 boolean exists = false;
-                JsonElement element = jsonConfig.getJsonElement().getAsJsonObject().get(key.getKey());
-                if (jsonConfig.getJsonElement().getAsJsonObject().has(key.getKey())) {
+                JsonElement element = jsonFile.getJsonElement().getAsJsonObject().get(key.getKey());
+                if (jsonFile.getJsonElement().getAsJsonObject().has(key.getKey())) {
                     for (ChatComponent message : ChatComponent.getMessages()) {
-                        if (language.equals(message.getLanguageKey().getLanguage()) && message.getLanguageKey().getMessageKey().equals(key)) {
+                        if (language.equals(message.getLanguageKey().language()) && message.getLanguageKey().messageKey().equals(key)) {
                             String value = element.getAsString();
                             if (value != null) message.setText(value);
                             else {
                                 message.setText(message.text());
-                                jsonConfig.getJsonElement().getAsJsonObject().addProperty(key.getKey(), message.text());
+                                jsonFile.getJsonElement().getAsJsonObject().addProperty(key.getKey(), message.text());
                             }
                             exists = true;
                             break;
@@ -134,14 +155,14 @@ public abstract class Message {
                     }
                 } else {
                     for (ChatComponent message : ChatComponent.getMessages()) {
-                        if (message.getLanguageKey().getLanguage().equals(language) && message.getLanguageKey().getMessageKey().equals(key)) {
-                            jsonConfig.getJsonElement().getAsJsonObject().addProperty(key.getKey(), message.text());
+                        if (message.getLanguageKey().language().equals(language) && message.getLanguageKey().messageKey().equals(key)) {
+                            jsonFile.getJsonElement().getAsJsonObject().addProperty(key.getKey(), message.text());
                             break;
                         }
                     }
                 }
             }
-            jsonConfig.save();
+            jsonFile.save();
         }
     }
 }

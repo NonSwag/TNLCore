@@ -1,39 +1,28 @@
 package net.nonswag.tnl.core.api.logger;
 
-import net.nonswag.tnl.core.api.message.ChatComponent;
 import net.nonswag.tnl.core.api.message.Message;
-import net.nonswag.tnl.core.api.message.placeholder.Placeholder;
-import net.nonswag.tnl.core.api.object.Pair;
-import net.nonswag.tnl.core.api.settings.Settings;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 
 public class Logger {
 
     @Nonnull
-    public static final Logger info = new Logger("info", Message.LOG_INFO.getText()).colorize(Color.LIME, Color.GOLD);
+    private static final PrintStream out = new PrintStream(new FileOutputStream(FileDescriptor.out), true);
     @Nonnull
-    public static final Logger warn = new Logger("warn", Message.LOG_WARN.getText()).colorize(Color.YELLOW, Color.WHITE);
+    private static final PrintStream err = new PrintStream(new FileOutputStream(FileDescriptor.err), true);
+
     @Nonnull
-    public static final Logger debug = new Logger("debug", Message.LOG_DEBUG.getText()).colorize(Color.YELLOW, Color.GOLD);
+    public static final Logger info = new Logger("info", Message.LOG_INFO.text(), out).colorize(Color.LIME, Color.GOLD);
     @Nonnull
-    public static final Logger error = new Logger("error", Message.LOG_ERROR.getText()).colorize(Color.RED, Color.DARK_RED);
-
-    static {
-        FileOutputStream outputStream = new FileOutputStream(FileDescriptor.out);
-        System.setOut(new PrintStream(outputStream, true));
-
-        FileOutputStream errorStream = new FileOutputStream(FileDescriptor.err);
-        System.setErr(new PrintStream(errorStream, true));
-
-        FileInputStream inputStream = new FileInputStream(FileDescriptor.in);
-        System.setIn(new BufferedInputStream(inputStream));
-    }
+    public static final Logger warn = new Logger("warn", Message.LOG_WARN.text(), out).colorize(Color.YELLOW, Color.WHITE);
+    @Nonnull
+    public static final Logger debug = new Logger("debug", Message.LOG_DEBUG.text(), out).colorize(Color.YELLOW, Color.GOLD);
+    @Nonnull
+    public static final Logger error = new Logger("error", Message.LOG_ERROR.text(), err).colorize(Color.RED, Color.DARK_RED);
 
     @Nonnull
     private final String name;
@@ -43,10 +32,13 @@ public class Logger {
     private Color mainColor = Color.RESET;
     @Nonnull
     private Color secondaryColor = Color.RESET;
+    @Nonnull
+    private final PrintStream printStream;
 
-    public Logger(@Nonnull String name, @Nonnull String prefix) {
+    public Logger(@Nonnull String name, @Nonnull String prefix, @Nonnull PrintStream printStream) {
         this.name = name;
         this.prefix = Color.replace(prefix);
+        this.printStream = printStream;
     }
 
     @Nonnull
@@ -86,24 +78,39 @@ public class Logger {
         return setMainColor(mainColor).setSecondaryColor(secondaryColor);
     }
 
-    public void printf(@Nonnull Object value, @Nonnull Placeholder... placeholders) {
-        println(Placeholder.replace(value, placeholders));
+    @Nonnull
+    private PrintStream getPrintStream() {
+        return printStream;
     }
 
-    public void printf(@Nonnull List<Pair<Object, Placeholder[]>> values) {
-        for (Pair<Object, Placeholder[]> pair : values) {
-            if (pair.getValue() != null) printf(pair.getKey(), pair.getValue());
-            else println(pair.getKey());
-        }
+    private void printStackTrace(@Nonnull Throwable throwable) {
+        StackTraceElement[] trace = throwable.getStackTrace();
+        for (StackTraceElement element : trace) println("\tat " + element);
+        Throwable[] suppressed = throwable.getSuppressed();
+        for (Throwable element : suppressed) println("Suppressed: \t" + element);
+        Throwable cause = throwable.getCause();
+        if (cause != null) printCause(cause);
+    }
+
+    private void printCause(@Nonnull Throwable cause) {
+        println("Caused by: " + cause);
+        StackTraceElement[] trace = cause.getStackTrace();
+        for (StackTraceElement element : trace) println("\tat " + element);
+        Throwable[] suppressed = cause.getSuppressed();
+        for (Throwable element : suppressed) println("Suppressed: \t" + element);
+        cause = cause.getCause();
+        if (cause != null) printCause(cause);
     }
 
     public void println(@Nonnull Object... values) {
-        if (!Settings.DEBUG.getValue() && equals(debug)) return;
         for (@Nullable Object value : values) {
             if (value != null) {
-                if (value instanceof Throwable) ((Throwable) value).printStackTrace();
-                else {
-                    String text = getMainColor().getCode() + value.toString().replace(".", "§8.%1%").
+                if (value instanceof Throwable throwable) {
+                    println(throwable.getClass().getSimpleName() + ": " + throwable.getMessage());
+                    printStackTrace(throwable);
+                } else {
+                    String string = Color.Hex.colorize(value.toString());
+                    String text = getMainColor().getCode() + string.replace(".", "§8.%1%").
                             replace(",", "§8,%1%").replace("<'", "§8'%2%").replace("'>", "§8'%1%").
                             replace(":", "§8:%2%").replace("[", "§8[%2%").replace("]", "§8]%1%").
                             replace("(", "§8(%2%").replace(")", "§8)%1%").replace("{", "§8{%2%").
@@ -111,10 +118,8 @@ public class Logger {
                             replace("\\", "§8\\%2%").replace("|", "§8|%2%").replace(">", "§8>%1%").
                             replace("<", "§8<%1%").replace("»", "§8»%1%").replace("«", "§8«%1%").
                             replace("%1%", getMainColor().getCode()).replace("%2%", getSecondaryColor().getCode());
-                    if (getPrefix().isEmpty()) System.out.println(Color.replace(ChatComponent.getText(text + "§r")));
-                    else {
-                        System.out.println(Color.replace(ChatComponent.getText(prefix, new Placeholder("thread", Thread.currentThread().getName()), new Placeholder("time", new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()))) + " " + ChatComponent.getText(text + "§r")));
-                    }
+                    if (getPrefix().isEmpty()) getPrintStream().println(Color.replace(text + "§r"));
+                    else getPrintStream().println(Color.replace(prefix + " " + text + "§r"));
                 }
             }
         }

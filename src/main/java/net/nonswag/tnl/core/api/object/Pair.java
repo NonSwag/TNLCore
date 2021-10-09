@@ -26,6 +26,17 @@ public class Pair<K, V> implements Duplicable {
         return value;
     }
 
+    @Nonnull
+    public V nonnull(@Nonnull String message) {
+        assert getValue() != null : message;
+        return getValue();
+    }
+
+    @Nonnull
+    public V nonnull() {
+        return nonnull("there is no value defined for this pair");
+    }
+
     public void setKey(@Nonnull K key) {
         this.key = key;
     }

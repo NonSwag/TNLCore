@@ -1,6 +1,8 @@
 package net.nonswag.tnl.core.api.logger;
 
 import javax.annotation.Nonnull;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public enum Color {
     BOLD_BLACK("\033[1;30m", "§o§l"),
@@ -60,7 +62,8 @@ public enum Color {
     PURPLE("\033[0;95m", "§d"),
     CYAN("\033[0;36m", "§3"),
     WHITE("\033[0;97m", "§f"),
-    ;
+
+    HEX("", "§x");
 
     @Nonnull
     private final String ansi;
@@ -102,6 +105,57 @@ public enum Color {
         return string;
     }
 
+    @Nonnull
+    public static String unColorize(@Nonnull String text, char... prefix) {
+        return Minecraft.unColorize(Hex.unColorize(text), prefix);
+    }
+
+    @Nonnull
+    public static String colorize(@Nonnull String text, char... prefix) {
+        return Minecraft.colorize(Hex.colorize(text), prefix);
+    }
+
+    public static final class Hex {
+
+        @Nonnull
+        private static final Pattern PATTERN_1 = Pattern.compile("<color:#[a-fA-F0-9]{6}>");
+        private static final Pattern PATTERN_2 = Pattern.compile("<#[a-fA-F0-9]{6}>");
+
+        @Nonnull
+        public static String colorize(@Nonnull String message) {
+            Matcher match = PATTERN_1.matcher(message);
+            while (match.find()) {
+                String hex = message.substring(match.start() + 7, match.end() - 1);
+                String code = message.substring(match.start(), match.end());
+                message = message.replace(code, Minecraft.getColor(hex));
+                match = PATTERN_1.matcher(message);
+            }
+            match = PATTERN_2.matcher(message);
+            while (match.find()) {
+                String hex = message.substring(match.start() + 1, match.end() - 1);
+                String code = message.substring(match.start(), match.end());
+                message = message.replace(code, Minecraft.getColor(hex));
+                match = PATTERN_2.matcher(message);
+            }
+            return message;
+        }
+
+        @Nonnull
+        public static String unColorize(@Nonnull String message) {
+            Matcher match = PATTERN_1.matcher(message);
+            while (match.find()) {
+                message = message.replace(message.substring(match.start(), match.end()), "");
+                match = PATTERN_1.matcher(message);
+            }
+            match = PATTERN_2.matcher(message);
+            while (match.find()) {
+                message = message.replace(message.substring(match.start(), match.end()), "");
+                match = PATTERN_2.matcher(message);
+            }
+            return message;
+        }
+    }
+
     public enum Minecraft {
         BLACK('0'),
         DARK_BLUE('1'),
@@ -138,19 +192,35 @@ public enum Color {
         }
 
         @Nonnull
-        public static String unColorize(@Nonnull String string, char prefix) {
-            for (Minecraft minecraft : Minecraft.values()) {
-                string = string.replace(String.valueOf(prefix) + minecraft.getIdentifier(), "");
+        public static String unColorize(@Nonnull String string, char... prefix) {
+            if (prefix.length == 0) prefix = new char[]{'&', '§'};
+            for (char c : prefix) {
+                for (Minecraft minecraft : Minecraft.values()) {
+                    string = string.replace(String.valueOf(c) + minecraft.getIdentifier(), "");
+                }
             }
             return string;
         }
 
         @Nonnull
-        public static String colorize(@Nonnull String string, char prefix) {
-            for (Minecraft minecraft : Minecraft.values()) {
-                string = string.replace(String.valueOf(prefix) + minecraft.getIdentifier(), "§" + minecraft.getIdentifier());
+        public static String colorize(@Nonnull String string, char... prefix) {
+            if (prefix.length == 0) prefix = new char[]{'&', '§'};
+            for (char c : prefix) {
+                for (Minecraft minecraft : Minecraft.values()) {
+                    string = string.replace(String.valueOf(c) + minecraft.getIdentifier(), "§" + minecraft.getIdentifier());
+                }
             }
             return string;
+        }
+
+        @Nonnull
+        public static String getColor(@Nonnull String hex) {
+            if (hex.length() >= 7) {
+                StringBuilder s = new StringBuilder("§x");
+                for (String s1 : hex.substring(1, 7).split("")) s.append("§").append(s1);
+                return s.toString();
+            }
+            return hex;
         }
     }
 }

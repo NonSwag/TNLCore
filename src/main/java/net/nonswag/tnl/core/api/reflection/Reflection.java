@@ -99,18 +99,49 @@ public class Reflection {
     }
 
     @Nonnull
+    public static Objects<Method> getStaticMethod(@Nonnull Class<?> clazz, @Nonnull String method, @Nullable Class<?>... parameters) {
+        try {
+            Method declaredMethod = clazz.getMethod(method, parameters);
+            declaredMethod.setAccessible(true);
+            return new Objects<>(declaredMethod);
+        } catch (NoSuchMethodException e) {
+            Logger.error.println(e);
+            return new Objects<>();
+        }
+    }
+
+    @Nonnull
     public static Objects<?> getField(@Nonnull Object object, @Nonnull String field) {
         return getField(object, Object.class, field);
     }
 
     @Nonnull
     public static <P> Objects<P> getField(@Nonnull Object object, @Nonnull Class<? extends P> parameter, @Nonnull String field) {
+        return getField(object, object.getClass(), parameter, field);
+    }
+
+    @Nonnull
+    public static <P> Objects<P> getField(@Nonnull Object object, @Nonnull Class<?> superclass, @Nonnull Class<? extends P> parameter, @Nonnull String field) {
         try {
-            Field declaredField = object.getClass().getDeclaredField(field);
+            Field declaredField = superclass.getDeclaredField(field);
             declaredField.setAccessible(true);
             return new Objects<>((P) declaredField.get(object));
         } catch (IllegalAccessException | NoSuchFieldException e) {
+            Logger.error.println(e);
             return new Objects<>();
+        }
+    }
+
+    public static boolean hasField(@Nonnull Object object, @Nonnull String field) {
+        return hasField(object, object.getClass(), field);
+    }
+
+    public static boolean hasField(@Nonnull Object object, @Nonnull Class<?> superclass, @Nonnull String field) {
+        try {
+            Object o = superclass.getDeclaredField(field).get(object);
+            return true;
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            return false;
         }
     }
 
@@ -156,6 +187,7 @@ public class Reflection {
     public static List<String> getFields(@Nonnull Class<?> clazz) {
         List<String> fields = new ArrayList<>();
         for (Field field : clazz.getDeclaredFields()) fields.add(field.getName());
+        for (Field field : clazz.getFields()) fields.add(field.getName());
         return fields;
     }
 }

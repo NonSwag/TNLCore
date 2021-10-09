@@ -1,0 +1,7 @@
+
+k
+java:S1206|"PThis class overrides "equals()" and should therefore also override "hashCode()".(Ý¢êÍýÿÿÿÿ
+b
+java:S6201h"LReplace this instanceof check and cast with 'instanceof Throwable throwable'(î¡ÐØ
+N	java:S106r"9Replace this use of System.out or System.err by a logger.(û÷µ§
+S	java:S106t"9Replace this use of System.out or System.err by a logger.(ÙŸý‹ûÿÿÿÿ

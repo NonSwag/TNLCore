@@ -31,17 +31,14 @@ public class Objects<V> implements Duplicable {
     }
 
     @Nonnull
-    public V nonnull(@Nullable String message) {
-        if (hasValue()) {
-            assert getValue() != null;
-            return getValue();
-        }
-        throw new NullPointerException(message);
+    public V nonnull(@Nonnull String message) {
+        assert getValue() != null : message;
+        return getValue();
     }
 
     @Nonnull
     public V nonnull() {
-        return nonnull(null);
+        return nonnull("there is no value defined for this object");
     }
 
     public boolean hasValue() {

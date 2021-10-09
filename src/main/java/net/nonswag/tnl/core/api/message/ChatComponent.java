@@ -1,12 +1,12 @@
 package net.nonswag.tnl.core.api.message;
 
+import net.nonswag.tnl.core.api.language.LanguageKey;
+import net.nonswag.tnl.core.api.logger.Color;
 import net.nonswag.tnl.core.api.logger.Logger;
-import net.nonswag.tnl.core.api.message.placeholder.formulary.Formulary;
-import net.nonswag.tnl.core.api.message.placeholder.formulary.PlayerFormulary;
-import net.nonswag.tnl.core.api.message.placeholder.formulary.VoidFormulary;
-import net.nonswag.tnl.core.api.message.language.LanguageKey;
-import net.nonswag.tnl.core.api.message.placeholder.Placeholder;
-import net.nonswag.tnl.core.api.player.Player;
+import net.nonswag.tnl.core.api.message.formulary.Formulary;
+import net.nonswag.tnl.core.api.message.formulary.PlayerFormulary;
+import net.nonswag.tnl.core.api.message.formulary.VoidFormulary;
+import net.nonswag.tnl.core.api.platform.PlatformPlayer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,7 +41,7 @@ public class ChatComponent {
 
     @Nonnull
     public String getText() {
-        return this.getText((Player) null);
+        return this.getText((PlatformPlayer) null);
     }
 
     public void setText(@Nonnull String text) {
@@ -49,17 +49,17 @@ public class ChatComponent {
     }
 
     @Nonnull
-    public String getText(@Nullable Player player, @Nonnull Placeholder... placeholders) {
+    public String getText(@Nullable PlatformPlayer player, @Nonnull Placeholder... placeholders) {
         return ChatComponent.getText(this.text, player, placeholders);
     }
 
     @Nonnull
     public String getText(@Nonnull Placeholder... placeholders) {
-        return this.getText((Player) null, placeholders);
+        return this.getText((PlatformPlayer) null, placeholders);
     }
 
     @Nonnull
-    public static String getText(@Nonnull String text, @Nullable Player player, @Nonnull Placeholder... placeholders) {
+    public static String getText(@Nonnull String text, @Nullable PlatformPlayer player, @Nonnull Placeholder... placeholders) {
         for (Placeholder placeholder : placeholders) {
             text = text.replace("%" + placeholder.placeholder() + "%", placeholder.object().toString());
         }
@@ -80,7 +80,7 @@ public class ChatComponent {
             }
             if (check != null) text = text.replace("%" + check.placeholder() + "%", check.object().toString());
         }
-        return text;
+        return Color.Hex.colorize(text);
     }
 
     @Nonnull
