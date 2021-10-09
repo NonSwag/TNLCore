@@ -2,6 +2,7 @@ package net.nonswag.tnl.core.api.logger;
 
 import net.nonswag.tnl.core.api.message.ChatComponent;
 import net.nonswag.tnl.core.api.message.Message;
+import net.nonswag.tnl.core.api.object.Condition;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -35,6 +36,8 @@ public class Logger {
     private Color secondaryColor = Color.RESET;
     @Nonnull
     private final PrintStream printStream;
+    @Nonnull
+    private Condition condition = () -> true;
 
     public Logger(@Nonnull String name, @Nonnull String prefix, @Nonnull PrintStream printStream) {
         this.name = name;
@@ -63,6 +66,16 @@ public class Logger {
     }
 
     @Nonnull
+    private PrintStream getPrintStream() {
+        return printStream;
+    }
+
+    @Nonnull
+    public Condition getCondition() {
+        return condition;
+    }
+
+    @Nonnull
     public Logger setMainColor(@Nonnull Color mainColor) {
         this.mainColor = mainColor;
         return this;
@@ -75,13 +88,14 @@ public class Logger {
     }
 
     @Nonnull
-    public Logger colorize(@Nonnull Color mainColor, @Nonnull Color secondaryColor) {
-        return setMainColor(mainColor).setSecondaryColor(secondaryColor);
+    public Logger setCondition(@Nonnull Condition condition) {
+        this.condition = condition;
+        return this;
     }
 
     @Nonnull
-    private PrintStream getPrintStream() {
-        return printStream;
+    public Logger colorize(@Nonnull Color mainColor, @Nonnull Color secondaryColor) {
+        return setMainColor(mainColor).setSecondaryColor(secondaryColor);
     }
 
     private void printStackTrace(@Nonnull Throwable throwable) {
@@ -104,6 +118,7 @@ public class Logger {
     }
 
     public void println(@Nonnull Object... values) {
+        if (!getCondition().check()) return;
         for (@Nullable Object value : values) {
             if (value != null) {
                 if (value instanceof Throwable throwable) {
@@ -119,7 +134,8 @@ public class Logger {
                             replace("\\", "§8\\%2%").replace("|", "§8|%2%").replace(">", "§8>%1%").
                             replace("<", "§8<%1%").replace("»", "§8»%1%").replace("«", "§8«%1%").
                             replace("%1%", getMainColor().getCode()).replace("%2%", getSecondaryColor().getCode());
-                    if (getPrefix().isEmpty()) getPrintStream().println(ChatComponent.getText(Color.replace(text + "§r")));
+                    if (getPrefix().isEmpty())
+                        getPrintStream().println(ChatComponent.getText(Color.replace(text + "§r")));
                     else getPrintStream().println(Color.replace(ChatComponent.getText(prefix + " " + text + "§r")));
                 }
             }
