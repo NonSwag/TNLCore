@@ -24,8 +24,29 @@ public class VirtualStorage {
 
     @Nonnull
     public <T> Objects<T> get(@Nonnull String key, @Nonnull Class<? extends T> clazz) {
-        if (clazz.isInstance(getStorage().get(key))) return new Objects<>((T) getStorage().get(key));
+        Object o = getStorage().get(key);
+        if (clazz.isInstance(o)) return new Objects<>((T) o);
         return new Objects<>();
+    }
+
+    @Nonnull
+    public Objects<Integer> getInteger(@Nonnull String key) {
+        return get(key, Integer.class);
+    }
+
+    @Nonnull
+    public Objects<Double> getDouble(@Nonnull String key) {
+        return get(key, Double.class);
+    }
+
+    @Nonnull
+    public Objects<Float> getFloat(@Nonnull String key) {
+        return get(key, Float.class);
+    }
+
+    @Nonnull
+    public Objects<Long> getLong(@Nonnull String key) {
+        return get(key, Long.class);
     }
 
     @Nonnull
@@ -54,11 +75,6 @@ public class VirtualStorage {
     @Nonnull
     public <T> Objects<T> getOrDefault(@Nonnull String key, @Nullable T object) {
         return object != null ? (Objects<T>) getOrDefault(key, object, object.getClass()) : new Objects<>();
-    }
-
-    @Nonnull
-    public Objects<Number> getNumber(@Nonnull String key) {
-        return get(key, Number.class);
     }
 
     @Nonnull
