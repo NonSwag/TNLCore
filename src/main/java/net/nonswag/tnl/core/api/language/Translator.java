@@ -1,6 +1,6 @@
 package net.nonswag.tnl.core.api.language;
 
-import com.google.gson.JsonParser;
+import net.nonswag.tnl.core.api.file.helper.JsonHelper;
 import net.nonswag.tnl.core.api.logger.Logger;
 
 import javax.annotation.Nonnull;
@@ -15,7 +15,7 @@ public class Translator {
         try {
             URL url = new URL("http://api.mymemory.translated.net/get?q=" + string.replace(" ", "%20").toLowerCase() + "&langpair=" + from.getShorthand() + "|" + to.getShorthand());
             InputStreamReader reader = new InputStreamReader(url.openStream());
-            String translatedText = JsonParser.parseReader(reader).getAsJsonObject().get("responseData").getAsJsonObject().get("translatedText").getAsString();
+            String translatedText = JsonHelper.parse(reader).getAsJsonObject().get("responseData").getAsJsonObject().get("translatedText").getAsString();
             return translatedText.replace("\"\"", "").replace(",", "").replace("match", "").replace("-", "").replace("\\\\u", "").replace("\\u", "").replace("~", "");
         } catch (Exception e) {
             Logger.error.println(e.getMessage());

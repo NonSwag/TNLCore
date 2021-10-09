@@ -4,6 +4,7 @@ import com.google.gson.*;
 import net.nonswag.tnl.core.api.file.Loadable;
 import net.nonswag.tnl.core.api.file.Saveable;
 import net.nonswag.tnl.core.api.file.helper.FileHelper;
+import net.nonswag.tnl.core.api.file.helper.JsonHelper;
 import net.nonswag.tnl.core.api.logger.Logger;
 import net.nonswag.tnl.core.utils.LinuxUtil;
 
@@ -47,7 +48,7 @@ public class JsonFile extends Loadable implements Saveable {
         try {
             FileHelper.create(getFile());
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), StandardCharsets.UTF_8));
-            jsonElement = JsonParser.parseReader(bufferedReader);
+            jsonElement = JsonHelper.parse(bufferedReader);
             if (jsonElement instanceof JsonNull) this.jsonElement = new JsonObject();
             bufferedReader.close();
             save();
