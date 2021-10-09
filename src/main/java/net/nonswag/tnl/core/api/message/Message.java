@@ -129,7 +129,7 @@ public abstract class Message {
 
     public static void init() {
         for (Language language : Language.getLanguages()) {
-            JsonFile jsonFile = new JsonFile("plugins/Listener/Messages/", language.getFile());
+            JsonFile jsonFile = new JsonFile("Core/Messages/", language.getFile());
             for (MessageKey key : MessageKey.getKeys()) {
                 if ((key.isSystemMessage() && !language.equals(Language.ROOT)) || (!key.isSystemMessage() && language.equals(Language.ROOT))) {
                     continue;

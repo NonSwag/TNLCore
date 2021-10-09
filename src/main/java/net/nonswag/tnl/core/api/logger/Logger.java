@@ -1,5 +1,6 @@
 package net.nonswag.tnl.core.api.logger;
 
+import net.nonswag.tnl.core.api.message.ChatComponent;
 import net.nonswag.tnl.core.api.message.Message;
 
 import javax.annotation.Nonnull;
@@ -118,8 +119,8 @@ public class Logger {
                             replace("\\", "§8\\%2%").replace("|", "§8|%2%").replace(">", "§8>%1%").
                             replace("<", "§8<%1%").replace("»", "§8»%1%").replace("«", "§8«%1%").
                             replace("%1%", getMainColor().getCode()).replace("%2%", getSecondaryColor().getCode());
-                    if (getPrefix().isEmpty()) getPrintStream().println(Color.replace(text + "§r"));
-                    else getPrintStream().println(Color.replace(prefix + " " + text + "§r"));
+                    if (getPrefix().isEmpty()) getPrintStream().println(ChatComponent.getText(Color.replace(text + "§r")));
+                    else getPrintStream().println(Color.replace(ChatComponent.getText(prefix + " " + text + "§r")));
                 }
             }
         }
