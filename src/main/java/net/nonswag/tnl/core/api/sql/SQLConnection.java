@@ -92,8 +92,7 @@ public class SQLConnection implements AutoCloseable, Duplicable {
         }
     }
 
-    @SafeVarargs
-    public final void createTable(@Nonnull String name, @Nonnull Pair<String, String>... parameters) {
+    public final void createTable(@Nonnull String name, @Nonnull Parameter... parameters) {
         if (parameters.length == 0) executeUpdate("CREATE TABLE IF NOT EXISTS " + name);
         else {
             StringBuilder builder = new StringBuilder();

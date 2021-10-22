@@ -56,12 +56,12 @@ public final class MessageKey extends Key {
     }
 
     @Nonnull
-    protected MessageKey register() {
+    public MessageKey register() {
         if (!getKeys().contains(this)) getKeys().add(this);
         return this;
     }
 
-    protected void unregister() {
+    public void unregister() {
         getKeys().remove(this);
     }
 

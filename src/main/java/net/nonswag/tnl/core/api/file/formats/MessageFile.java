@@ -29,34 +29,34 @@ public class MessageFile extends PropertyFile {
     }
 
     public final void setDefault(@Nonnull Key key, @Nonnull String message) {
-        this.setDefault(key.getKey(), message);
+        setDefault(key.getKey(), message);
     }
 
     public final void setDefault(@Nonnull String key, @Nonnull String message) {
-        this.setValueIfAbsent(key, message);
+        setValueIfAbsent(key, message);
     }
 
     public final void setMessage(@Nonnull Key key, @Nonnull String message) {
-        this.setMessage(key.getKey(), message);
+        setMessage(key.getKey(), message);
     }
 
     public final void setMessage(@Nonnull String key, @Nonnull String message) {
-        this.setValue(key, message);
+        setValue(key, message);
     }
 
     @Nullable
     public final String getMessage(@Nonnull Key key) {
-        return this.getMessage(key.getKey());
+        return getMessage(key.getKey());
     }
 
     @Nullable
     public final String getMessage(@Nonnull String key) {
-        return this.getString(key);
+        return getString(key);
     }
 
     @Nonnull
     public final String getMessage(@Nonnull Key key, @Nonnull String defaultValue) {
-        return this.getOrDefault(key.getKey(), defaultValue);
+        return getOrDefault(key.getKey(), defaultValue);
     }
 
     @Nonnull

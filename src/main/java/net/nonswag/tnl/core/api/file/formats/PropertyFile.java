@@ -106,14 +106,14 @@ public class PropertyFile extends Loadable implements Saveable {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(getFile()))) {
             getComments().forEach((comment) -> {
                 try {
-                    writer.write("#" + comment + "\n");
+                    writer.write("#" + comment.replace("\n", "\\n") + "\n");
                 } catch (IOException e) {
                     Logger.error.println("Failed to save a comment", "content: <'" + comment + "'>", e);
                 }
             });
             getValues().forEach((key, value) -> {
                 try {
-                    writer.write(key + this.getDelimeter() + value + "\n");
+                    writer.write((key + this.getDelimeter() + value).replace("\n", "\\n") + "\n");
                 } catch (IOException e) {
                     Logger.error.println("Failed to save a property", "content: <'" + key + getDelimeter() + value + "'>", e);
                 }

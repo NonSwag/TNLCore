@@ -7,7 +7,6 @@ package net.nonswag.tnl.core.api.message;
 
 import net.nonswag.tnl.core.api.file.formats.MessageFile;
 import net.nonswag.tnl.core.api.file.formats.PropertyFile;
-import net.nonswag.tnl.core.api.file.helper.FileHelper;
 import net.nonswag.tnl.core.api.language.Language;
 import net.nonswag.tnl.core.api.logger.Color.Hex;
 import net.nonswag.tnl.core.api.logger.Logger;
@@ -19,49 +18,23 @@ import net.nonswag.tnl.core.api.message.key.Key;
 import net.nonswag.tnl.core.api.message.key.MessageKey;
 import net.nonswag.tnl.core.api.message.key.SystemMessageKey;
 import net.nonswag.tnl.core.api.platform.PlatformPlayer;
-import net.nonswag.tnl.core.utils.LinuxUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 public final class Message {
 
     @Nonnull
-    private static final MessageFile root;
+    private static final MessageFile root = new MessageFile("Core/Messages/", Language.ROOT).register();
     @Nonnull
-    private static final MessageFile english;
+    private static final MessageFile english = new MessageFile("Core/Messages/", Language.AMERICAN_ENGLISH).register();
     @Nonnull
-    private static final MessageFile german;
-
-    static {
-        copyFile(Message.class.getClassLoader().getResource("system.locale"));
-        copyFile(Message.class.getClassLoader().getResource("american-english.locale"));
-        copyFile(Message.class.getClassLoader().getResource("german.locale"));
-        root = new MessageFile("Core/Messages/", Language.ROOT);
-        english = new MessageFile("Core/Messages/", Language.AMERICAN_ENGLISH);
-        german = new MessageFile("Core/Messages/", Language.GERMAN);
-    }
+    private static final MessageFile german = new MessageFile("Core/Messages/", Language.GERMAN).register();
 
     private Message() {
-    }
-
-    private static void copyFile(@Nullable URL from) {
-        if (from == null) return;
-        try {
-            File file = new File("Core/Messages/");
-            FileHelper.create(file);
-            File sourceFile = new File(from.getFile());
-            if (!new File(file, sourceFile.getName()).exists()) {
-                LinuxUtil.runSafeShellCommand("cp " + sourceFile.getAbsolutePath() + " " + file.getAbsolutePath() + "/" + sourceFile.getName(), null);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Nonnull

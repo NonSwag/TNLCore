@@ -7,6 +7,9 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public final class FileHelper {
 
@@ -54,5 +57,21 @@ public final class FileHelper {
             }
             LinuxUtil.runSafeShellCommand("rmdir " + directory.getAbsolutePath(), null);
         } else LinuxUtil.runSafeShellCommand("rm " + directory.getAbsolutePath(), null);
+    }
+
+    public static void copyResourceFile(@Nonnull Class<?> clazz, @Nonnull String resource, @Nonnull String destination, boolean override) {
+        File to = new File(destination).getAbsoluteFile();
+        FileHelper.createSilent(to);
+        File file = new File(to, resource);
+        if (override || !file.exists()) {
+            InputStream from = clazz.getClassLoader().getResourceAsStream(resource);
+            if (from != null) {
+                try {
+                    Files.copy(from, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else System.err.println("resource file not found (" + resource + ")");
+        }
     }
 }
