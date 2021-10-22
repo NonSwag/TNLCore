@@ -84,7 +84,6 @@ public class PropertyFile extends Loadable implements Saveable {
             reader.lines().forEach(s -> {
                 if (s.startsWith("#")) this.getComments().add(s.substring(1));
                 else {
-                    System.out.println(s);
                     List<String> split = Arrays.asList(s.split(this.getDelimeter()));
                     if (split.size() >= 1 && !split.get(0).isEmpty()) {
                         getValues().put(split.get(0).toLowerCase(), String.join(getDelimeter(), split.subList(1, split.size())));
