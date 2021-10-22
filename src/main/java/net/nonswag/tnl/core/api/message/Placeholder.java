@@ -2,8 +2,10 @@ package net.nonswag.tnl.core.api.message;
 
 import net.nonswag.tnl.core.api.logger.Logger;
 import net.nonswag.tnl.core.api.message.formulary.Formulary;
+import net.nonswag.tnl.core.api.message.formulary.PlayerFormulary;
 import net.nonswag.tnl.core.api.message.formulary.VoidFormulary;
 import net.nonswag.tnl.core.api.message.key.SystemMessageKey;
+import net.nonswag.tnl.core.api.platform.PlatformPlayer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -84,6 +86,14 @@ public record Placeholder(@Nonnull String placeholder, @Nonnull Object object) {
                 @Override
                 public Placeholder check(@Nullable Void value) {
                     return new Placeholder("thread", Thread.currentThread().getName());
+                }
+            });
+
+            register(new PlayerFormulary() {
+                @Nonnull
+                @Override
+                public Placeholder check(@Nonnull PlatformPlayer player) {
+                    return new Placeholder("player", player.getName());
                 }
             });
         }
