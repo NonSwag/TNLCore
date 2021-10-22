@@ -13,7 +13,7 @@ public class Translator {
     public static String translate(@Nonnull String string, @Nonnull Language from, @Nonnull Language to) {
         if (from.equals(to)) return string;
         try {
-            URL url = new URL("http://api.mymemory.translated.net/get?q=" + string.replace(" ", "%20").toLowerCase() + "&langpair=" + from.getShorthand() + "|" + to.getShorthand());
+            URL url = new URL("http://api.mymemory.translated.net/get?q=" + string.replace(" ", "%20").toLowerCase() + "&langpair=" + from.shorthand() + "|" + to.shorthand());
             InputStreamReader reader = new InputStreamReader(url.openStream());
             String translatedText = JsonHelper.parse(reader).getAsJsonObject().get("responseData").getAsJsonObject().get("translatedText").getAsString();
             return translatedText.replace("\"\"", "").replace(",", "").replace("match", "").replace("-", "").replace("\\\\u", "").replace("\\u", "").replace("~", "");

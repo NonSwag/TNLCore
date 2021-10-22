@@ -1,8 +1,9 @@
 package net.nonswag.tnl.core.api.logger;
 
-import net.nonswag.tnl.core.api.message.ChatComponent;
 import net.nonswag.tnl.core.api.message.Message;
+import net.nonswag.tnl.core.api.message.key.SystemMessageKey;
 import net.nonswag.tnl.core.api.object.Condition;
+import net.nonswag.tnl.core.api.object.Getter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,18 +19,18 @@ public class Logger {
     private static final PrintStream err = new PrintStream(new FileOutputStream(FileDescriptor.err), true);
 
     @Nonnull
-    public static final Logger info = new Logger("info", Message.LOG_INFO.text(), out).colorize(Color.LIME, Color.GOLD);
+    public static final Logger info = new Logger("info", () -> SystemMessageKey.LOG_INFO.message(), out).colorize(Color.LIME, Color.GOLD);
     @Nonnull
-    public static final Logger warn = new Logger("warn", Message.LOG_WARN.text(), out).colorize(Color.YELLOW, Color.WHITE);
+    public static final Logger warn = new Logger("warn", () -> SystemMessageKey.LOG_WARN.message(), out).colorize(Color.YELLOW, Color.WHITE);
     @Nonnull
-    public static final Logger debug = new Logger("debug", Message.LOG_DEBUG.text(), out).colorize(Color.YELLOW, Color.GOLD);
+    public static final Logger debug = new Logger("debug", () -> SystemMessageKey.LOG_DEBUG.message(), out).colorize(Color.YELLOW, Color.GOLD);
     @Nonnull
-    public static final Logger error = new Logger("error", Message.LOG_ERROR.text(), err).colorize(Color.RED, Color.DARK_RED);
+    public static final Logger error = new Logger("error", () -> SystemMessageKey.LOG_ERROR.message(), err).colorize(Color.RED, Color.DARK_RED);
 
     @Nonnull
     private final String name;
     @Nonnull
-    private final String prefix;
+    private final Getter<String> prefix;
     @Nonnull
     private Color mainColor = Color.RESET;
     @Nonnull
@@ -39,9 +40,9 @@ public class Logger {
     @Nonnull
     private Condition condition = () -> true;
 
-    public Logger(@Nonnull String name, @Nonnull String prefix, @Nonnull PrintStream printStream) {
+    public Logger(@Nonnull String name, @Nonnull Getter<String> prefix, @Nonnull PrintStream printStream) {
         this.name = name;
-        this.prefix = Color.replace(prefix);
+        this.prefix = prefix;
         this.printStream = printStream;
     }
 
@@ -51,7 +52,7 @@ public class Logger {
     }
 
     @Nonnull
-    protected String getPrefix() {
+    public Getter<String> getPrefix() {
         return prefix;
     }
 
@@ -120,24 +121,23 @@ public class Logger {
     public void println(@Nonnull Object... values) {
         if (!getCondition().check()) return;
         for (@Nullable Object value : values) {
-            if (value != null) {
-                if (value instanceof Throwable throwable) {
-                    println(throwable.getClass().getSimpleName() + ": " + throwable.getMessage());
-                    printStackTrace(throwable);
-                } else {
-                    String string = Color.Hex.colorize(value.toString());
-                    String text = getMainColor().getCode() + string.replace(".", "§8.%1%").
-                            replace(",", "§8,%1%").replace("<'", "§8'%2%").replace("'>", "§8'%1%").
-                            replace(":", "§8:%2%").replace("[", "§8[%2%").replace("]", "§8]%1%").
-                            replace("(", "§8(%2%").replace(")", "§8)%1%").replace("{", "§8{%2%").
-                            replace("}", "§8}%1%").replace("\"", "§8\"%1%").replace("/", "§8/%2%").
-                            replace("\\", "§8\\%2%").replace("|", "§8|%2%").replace(">", "§8>%1%").
-                            replace("<", "§8<%1%").replace("»", "§8»%1%").replace("«", "§8«%1%").
-                            replace("%1%", getMainColor().getCode()).replace("%2%", getSecondaryColor().getCode());
-                    if (getPrefix().isEmpty())
-                        getPrintStream().println(ChatComponent.getText(Color.replace(text + "§r")));
-                    else getPrintStream().println(Color.replace(ChatComponent.getText(prefix + " " + text + "§r")));
-                }
+            if (value == null) continue;
+            if (value instanceof Throwable throwable) {
+                println(throwable.getClass().getSimpleName() + ": " + throwable.getMessage());
+                printStackTrace(throwable);
+            } else {
+                String string = Color.Hex.colorize(value.toString());
+                String text = getMainColor().getCode() + string.replace(".", "§8.%1%").
+                        replace(",", "§8,%1%").replace("<'", "§8'%2%").replace("'>", "§8'%1%").
+                        replace(":", "§8:%2%").replace("[", "§8[%2%").replace("]", "§8]%1%").
+                        replace("(", "§8(%2%").replace(")", "§8)%1%").replace("{", "§8{%2%").
+                        replace("}", "§8}%1%").replace("\"", "§8\"%1%").replace("/", "§8/%2%").
+                        replace("\\", "§8\\%2%").replace("|", "§8|%2%").replace(">", "§8>%1%").
+                        replace("<", "§8<%1%").replace("»", "§8»%1%").replace("«", "§8«%1%").
+                        replace("%1%", getMainColor().getCode()).replace("%2%", getSecondaryColor().getCode());
+                String prefix = Color.replace(getPrefix().get());
+                if (prefix.isEmpty()) getPrintStream().println(Message.format(Color.replace(text + "§r")));
+                else getPrintStream().println(Color.replace(Message.format(prefix + " " + text + "§r")));
             }
         }
     }

@@ -29,10 +29,10 @@ public class JsonHelper {
             if (!element.isJsonNull() && jsonReader.peek() != JsonToken.END_DOCUMENT) {
                 throw new JsonSyntaxException("Did not consume the entire document.");
             } else return element;
-        } catch (MalformedJsonException | NumberFormatException var3) {
-            throw new JsonSyntaxException(var3);
-        } catch (IOException var4) {
-            throw new JsonIOException(var4);
+        } catch (MalformedJsonException | NumberFormatException e) {
+            throw new JsonSyntaxException(e);
+        } catch (IOException e) {
+            throw new JsonIOException(e);
         }
     }
 
@@ -42,8 +42,8 @@ public class JsonHelper {
         reader.setLenient(true);
         try {
             return Streams.parse(reader);
-        } catch (StackOverflowError | OutOfMemoryError var7) {
-            throw new JsonParseException("Failed parsing JSON source: " + reader + " to Json", var7);
+        } catch (StackOverflowError | OutOfMemoryError e) {
+            throw new JsonParseException("Failed parsing JSON source: " + reader + " to Json", e);
         } finally {
             reader.setLenient(lenient);
         }

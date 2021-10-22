@@ -45,18 +45,17 @@ public class JsonFile extends Loadable implements Saveable {
     @Nonnull
     @Override
     protected final JsonFile load() {
-        try {
-            FileHelper.create(getFile());
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), StandardCharsets.UTF_8));
-            jsonElement = JsonHelper.parse(bufferedReader);
+        FileHelper.createSilent(getFile());
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), StandardCharsets.UTF_8))) {
+            jsonElement = JsonHelper.parse(reader);
             if (jsonElement instanceof JsonNull) this.jsonElement = new JsonObject();
-            bufferedReader.close();
             save();
         } catch (Exception e) {
             LinuxUtil.runSafeShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
             Logger.error.println("Failed to load file <'" + getFile().getAbsolutePath() + "'>", "Creating Backup of the old file");
+        } finally {
+            if (!isValid()) Logger.error.println("The file <'" + getFile().getAbsolutePath() + "'> is invalid");
         }
-        if (!isValid()) Logger.error.println("The file <'" + getFile().getAbsolutePath() + "'> is invalid");
         return this;
     }
 

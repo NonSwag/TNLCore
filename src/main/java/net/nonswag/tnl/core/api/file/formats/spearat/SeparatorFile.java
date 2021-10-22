@@ -4,6 +4,7 @@ import net.nonswag.tnl.core.api.file.Loadable;
 import net.nonswag.tnl.core.api.file.Saveable;
 import net.nonswag.tnl.core.api.file.helper.FileHelper;
 import net.nonswag.tnl.core.api.logger.Logger;
+import net.nonswag.tnl.core.utils.LinuxUtil;
 
 import javax.annotation.Nonnull;
 import java.io.*;
@@ -65,37 +66,30 @@ public abstract class SeparatorFile extends Loadable implements Saveable {
     @Nonnull
     @Override
     protected final SeparatorFile load() {
-        try {
-            FileHelper.create(getFile());
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), StandardCharsets.UTF_8));
-            Object[] array = bufferedReader.lines().toArray();
-            List<List<String>> entries = new ArrayList<>(new ArrayList<>());
-            for (Object o : array) {
-                if (!o.toString().isEmpty()) {
-                    entries.add(Arrays.asList(o.toString().split(getDelimiter())));
-                }
-            }
-            setEntries(entries);
-            bufferedReader.close();
+        FileHelper.createSilent(this.getFile());
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(this.getFile()), StandardCharsets.UTF_8))) {
+            getEntries().clear();
+            reader.lines().forEach(s -> {
+                if (!s.isEmpty()) getEntries().add(Arrays.asList(s.split(getDelimiter())));
+            });
             save();
         } catch (Exception e) {
-            Logger.error.println(e);
+            LinuxUtil.runSafeShellCommand("cp " + this.getFile().getName() + " broken-" + this.getFile().getName(), this.getFile().getAbsoluteFile().getParentFile());
+            Logger.error.println("Failed to load file <'" + this.getFile().getAbsolutePath() + "'>", "Creating Backup of the old file", e);
         } finally {
-            if (!isValid()) Logger.error.println("The file <'" + getFile().getAbsolutePath() + "'> is invalid");
+            if (!this.isValid()) {
+                Logger.error.println("The file <'" + this.getFile().getAbsolutePath() + "'> is invalid");
+            }
         }
         return this;
     }
 
     @Override
     public final void save() {
-        try {
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(getFile()), StandardCharsets.UTF_8));
-            for (List<String> entry : getEntries()) {
-                writer.write(String.join(getDelimiter(), entry) + "\n");
-            }
-            writer.close();
-        } catch (Exception e) {
-            Logger.error.println("Failed to save file <'" + getFile().getAbsolutePath() + "'>", e);
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(this.getFile()), StandardCharsets.UTF_8))) {
+            for (List<String> entry : getEntries()) writer.write(String.join(getDelimiter(), entry) + "\n");
+        } catch (Exception var6) {
+            Logger.error.println("Failed to save file <'" + this.getFile().getAbsolutePath() + "'>", var6);
         }
     }
 

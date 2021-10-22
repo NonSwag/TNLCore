@@ -4,59 +4,47 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Language {
+public record Language(@Nonnull String name, @Nonnull String shorthand) {
 
     @Nonnull
     private static final List<Language> languages = new ArrayList<>();
 
     @Nonnull
-    public static final Language ROOT = new Language("system", "");
+    public static final Language ROOT = (new Language("system", "")).register();
     @Nonnull
-    public static final Language UNKNOWN = new Language("Unknown", "");
+    public static final Language UNKNOWN = new Language("unknown", "");
+    @Nonnull
+    public static final Language GERMAN = (new Language("German", "de_de")).register();
+    @Nonnull
+    public static final Language AMERICAN_ENGLISH = (new Language("American English", "en_us")).register();
 
-    @Nonnull
-    public static final Language GERMAN = new Language("German", "de_de");
-    @Nonnull
-    public static final Language AMERICAN_ENGLISH = new Language("American English", "en_us");
-
-    @Nonnull
-    private final String name;
-    @Nonnull
-    private final String shorthand;
-    @Nonnull
-    private final String file;
-
-    Language(@Nonnull String name, @Nonnull String shorthand) {
+    public Language(@Nonnull String name, @Nonnull String shorthand) {
         this.name = name;
         this.shorthand = shorthand;
-        this.file = ("messages" + (getShorthand().isEmpty() ? "" : "-" + getShorthand()) + ".json");
-        getLanguages().add(this);
     }
 
     @Nonnull
-    public String getName() {
-        return name;
+    public Language register() {
+        if (!getLanguages().contains(this)) getLanguages().add(this);
+        return this;
+    }
+
+    public void unregister() {
+        getLanguages().remove(this);
     }
 
     @Nonnull
-    public String getShorthand() {
-        return shorthand;
-    }
-
-    @Nonnull
-    public String getFile() {
-        return file;
+    @Override
+    public String toString() {
+        return name() + (shorthand().isEmpty() ? "" : ", " + shorthand());
     }
 
     @Nonnull
     public static Language fromLocale(@Nonnull String locale) {
-        try {
-            for (Language language : getLanguages()) {
-                if (language.getShorthand().equalsIgnoreCase(locale) || language.getName().equalsIgnoreCase(locale)) {
-                    return language;
-                }
+        for (Language language : getLanguages()) {
+            if (language.shorthand().equalsIgnoreCase(locale) || language.name().equalsIgnoreCase(locale)) {
+                return language;
             }
-        } catch (IllegalArgumentException | NullPointerException ignored) {
         }
         return Language.UNKNOWN;
     }

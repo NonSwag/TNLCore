@@ -13,7 +13,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Reflection {
+public final class Reflection {
+
+    private Reflection() {
+    }
 
     @Nonnull
     public static Object createInstance(@Nonnull Class<?> clazz) {

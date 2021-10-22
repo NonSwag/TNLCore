@@ -4,10 +4,13 @@ import net.nonswag.tnl.core.api.message.Message;
 
 import javax.annotation.Nonnull;
 
-public class Core {
+public final class Core {
 
     static {
         Message.init();
+    }
+
+    private Core() {
     }
 
     public static void main(@Nonnull String[] args) {

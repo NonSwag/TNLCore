@@ -2,6 +2,7 @@ package net.nonswag.tnl.core.api.sql;
 
 import net.nonswag.tnl.core.api.logger.Logger;
 import net.nonswag.tnl.core.api.object.Duplicable;
+import net.nonswag.tnl.core.api.object.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -88,6 +89,20 @@ public class SQLConnection implements AutoCloseable, Duplicable {
             return getConnection().isClosed();
         } catch (SQLException e) {
             return true;
+        }
+    }
+
+    @SafeVarargs
+    public final void createTable(@Nonnull String name, @Nonnull Pair<String, String>... parameters) {
+        if (parameters.length == 0) executeUpdate("CREATE TABLE IF NOT EXISTS " + name);
+        else {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < parameters.length; i++) {
+                Pair<String, String> parameter = parameters[i];
+                builder.append(parameter.getKey()).append(", ").append(parameter.getValue());
+                if (i + 1 < parameters.length) builder.append(", ");
+            }
+            executeUpdate("CREATE TABLE IF NOT EXISTS " + name + " (" + builder + ")");
         }
     }
 

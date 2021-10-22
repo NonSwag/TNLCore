@@ -10,6 +10,9 @@ public final class StringUtil {
     @Nonnull
     public static String VALID_CHARS = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
 
+    private StringUtil() {
+    }
+
     @Nonnull
     public static String random(int length) {
         StringBuilder randomString = new StringBuilder();

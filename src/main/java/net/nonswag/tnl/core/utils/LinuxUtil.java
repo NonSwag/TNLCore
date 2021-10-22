@@ -11,26 +11,29 @@ import java.io.InputStreamReader;
 
 public final class LinuxUtil {
 
-    private static boolean debug = false;
+    private static boolean print = false;
 
-    public static boolean isDebug() {
-        return debug;
+    private LinuxUtil() {
     }
 
-    public static void setDebug(boolean debug) {
-        LinuxUtil.debug = debug;
+    public static boolean isPrint() {
+        return print;
+    }
+
+    public static void setPrint(boolean print) {
+        LinuxUtil.print = print;
     }
 
     public static void runShellCommand(@Nonnull String command, @Nullable File directory) throws IOException, InterruptedException {
         Process process = directory == null ? Runtime.getRuntime().exec(command) : Runtime.getRuntime().exec(command, null, directory);
         BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        if (isDebug()) {
+        if (isPrint()) {
             String string;
             Logger.info.println("Executing: " + command);
             while ((string = br.readLine()) != null) Logger.info.println(string);
         }
         process.waitFor();
-        if (isDebug()) Logger.info.println("Finished program with exit code: " + process.exitValue());
+        if (isPrint()) Logger.info.println("Finished program with exit code: " + process.exitValue());
         process.destroy();
     }
 

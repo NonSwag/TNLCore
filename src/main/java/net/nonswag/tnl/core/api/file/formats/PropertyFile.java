@@ -5,17 +5,25 @@ import net.nonswag.tnl.core.api.file.Saveable;
 import net.nonswag.tnl.core.api.file.helper.FileHelper;
 import net.nonswag.tnl.core.api.logger.Logger;
 import net.nonswag.tnl.core.api.object.Objects;
+import net.nonswag.tnl.core.utils.LinuxUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class PropertyFile extends Loadable implements Saveable {
 
     @Nonnull
     private final HashMap<String, String> values = new HashMap<>();
+    @Nonnull
+    private List<String> comments = new ArrayList<>();
+    private boolean sort = false;
 
     public PropertyFile(@Nonnull String file) {
         super(file);
@@ -33,40 +41,89 @@ public class PropertyFile extends Loadable implements Saveable {
     }
 
     @Nonnull
+    public final List<String> getComments() {
+        return comments;
+    }
+
+    public final void setComments(@Nonnull List<String> comments) {
+        this.comments = comments;
+    }
+    public final void addComment(@Nonnull String comment) {
+        getComments().add(comment);
+    }
+
+    public final void addCommentIfAbsent(@Nonnull String comment) {
+        if (!hasComment(comment)) addComment(comment);
+    }
+
+    public final void removeComment(@Nonnull String comment) {
+        getComments().removeIf((s) -> s.equals(comment));
+    }
+
+    public final boolean hasComment(@Nonnull String comment) {
+        return getComments().contains(comment);
+    }
+
+    @Nonnull
+    public final PropertyFile setSort(boolean sort) {
+        this.sort = sort;
+        return this;
+    }
+
+    public final boolean isSort() {
+        return sort;
+    }
+
+    @Nonnull
+    protected String getDelimeter() {
+        return "=";
+    }
+
+    @Nonnull
     @Override
     protected final PropertyFile load() {
+        FileHelper.createSilent(this.getFile());
         try {
-            FileHelper.create(getFile());
             getValues().clear();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), StandardCharsets.UTF_8));
-            reader.lines().forEach(s -> {
-                List<String> split = Arrays.asList(s.split("="));
-                if (split.size() >= 1 && !split.get(0).isEmpty()) {
-                    getValues().put(split.get(0).toLowerCase(), String.join("=", split.subList(1, split.size())));
+            Files.lines(Paths.get(this.getFile().toURI())).forEach((s) -> {
+                if (s.startsWith("#")) this.getComments().add(s.substring(1));
+                else {
+                    System.out.println(s);
+                    List<String> split = Arrays.asList(s.split(this.getDelimeter()));
+                    if (split.size() >= 1 && !split.get(0).isEmpty()) {
+                        getValues().put(split.get(0).toLowerCase(), String.join(getDelimeter(), split.subList(1, split.size())));
+                    }
                 }
             });
-            reader.close();
-            save();
+            this.save();
         } catch (Exception e) {
-            Logger.error.println(e.getMessage());
+            LinuxUtil.runSafeShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
+            Logger.error.println("Failed to load file <'" + getFile().getAbsolutePath() + "'>", "Creating Backup of the old file", e);
+        } finally {
+            if (!isValid()) Logger.error.println("The file <'" + getFile().getAbsolutePath() + "'> is invalid");
         }
-        if (!isValid()) Logger.error.println("The file <'" + getFile().getAbsolutePath() + "'> is invalid");
         return this;
     }
 
     @Override
     public final void save() {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(getFile()));
-            getValues().keySet().stream().sorted().forEach(key -> {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.getFile()))) {
+            getComments().forEach((comment) -> {
                 try {
-                    writer.write(key.toLowerCase() + "=" + getString(key) + "\n");
-                } catch (Exception ignored) {
+                    writer.write("#" + comment + "\n");
+                } catch (IOException e) {
+                    Logger.error.println("Failed to save a comment", "content: <'" + comment + "'>", e);
                 }
             });
-            writer.close();
-        } catch (Exception e) {
-            Logger.error.println("Failed to save file <'" + getFile().getAbsolutePath() + "'>", e);
+            getValues().forEach((key, value) -> {
+                try {
+                    writer.write(key + this.getDelimeter() + value + "\n");
+                } catch (IOException e) {
+                    Logger.error.println("Failed to save a property", "content: <'" + key + getDelimeter() + value + "'>", e);
+                }
+            });
+        } catch (Exception var6) {
+            Logger.error.println("Failed to save file <'" + getFile().getAbsolutePath() + "'>", var6);
         }
     }
 

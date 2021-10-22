@@ -19,16 +19,19 @@ public final class FileHelper {
     }
 
     public static void create(@Nonnull File file) throws IOException {
-        if (!file.exists()) {
-            if (file.getAbsoluteFile().getParentFile().mkdirs()) {
-                Logger.debug.println("Generated directories <'" + file.getAbsoluteFile().getParent() + "'>");
-            }
-            if (file.createNewFile()) {
-                Logger.debug.println("Generated file <'" + file.getAbsolutePath() + "'>");
-            } else {
-                Logger.error.println("Couldn't generate file <'" + file.getAbsolutePath() + "'>");
-                throw new FileNotFoundException("Couldn't generate file");
-            }
+        if (file.exists()) return;
+        if (!file.getName().contains(".")) file.getAbsoluteFile().mkdirs();
+        else {
+            file.getAbsoluteFile().getParentFile().mkdirs();
+            if (!file.createNewFile()) throw new FileNotFoundException("Couldn't generate file");
+        }
+    }
+
+    public static void createSilent(@Nonnull File file) {
+        try {
+            create(file);
+        } catch (IOException e) {
+            Logger.error.println("Failed to create the file <'" + file.getAbsolutePath() + "'>", e);
         }
     }
 
