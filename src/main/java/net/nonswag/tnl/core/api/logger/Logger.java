@@ -19,13 +19,13 @@ public class Logger {
     private static final PrintStream err = new PrintStream(new FileOutputStream(FileDescriptor.err), true);
 
     @Nonnull
-    public static final Logger info = new Logger("info", () -> SystemMessageKey.LOG_INFO.message(), out).colorize(Color.LIME, Color.GOLD);
+    public static final Logger info = new Logger("info", SystemMessageKey.LOG_INFO::message, out).colorize(Color.LIME, Color.GOLD);
     @Nonnull
-    public static final Logger warn = new Logger("warn", () -> SystemMessageKey.LOG_WARN.message(), out).colorize(Color.YELLOW, Color.WHITE);
+    public static final Logger warn = new Logger("warn", SystemMessageKey.LOG_WARN::message, out).colorize(Color.YELLOW, Color.WHITE);
     @Nonnull
-    public static final Logger debug = new Logger("debug", () -> SystemMessageKey.LOG_DEBUG.message(), out).colorize(Color.YELLOW, Color.GOLD);
+    public static final Logger debug = new Logger("debug", SystemMessageKey.LOG_DEBUG::message, out).colorize(Color.YELLOW, Color.GOLD);
     @Nonnull
-    public static final Logger error = new Logger("error", () -> SystemMessageKey.LOG_ERROR.message(), err).colorize(Color.RED, Color.DARK_RED);
+    public static final Logger error = new Logger("error", SystemMessageKey.LOG_ERROR::message, err).colorize(Color.RED, Color.DARK_RED);
 
     @Nonnull
     private final String name;

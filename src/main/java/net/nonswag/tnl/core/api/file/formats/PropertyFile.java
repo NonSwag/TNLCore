@@ -9,12 +9,8 @@ import net.nonswag.tnl.core.utils.LinuxUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class PropertyFile extends Loadable implements Saveable {
@@ -82,10 +78,10 @@ public class PropertyFile extends Loadable implements Saveable {
     @Nonnull
     @Override
     protected final PropertyFile load() {
-        FileHelper.createSilent(this.getFile());
-        try {
+        FileHelper.createSilent(getFile());
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), StandardCharsets.UTF_8))) {
             getValues().clear();
-            Files.lines(Paths.get(this.getFile().toURI())).forEach((s) -> {
+            reader.lines().forEach(s -> {
                 if (s.startsWith("#")) this.getComments().add(s.substring(1));
                 else {
                     System.out.println(s);
@@ -98,7 +94,8 @@ public class PropertyFile extends Loadable implements Saveable {
             this.save();
         } catch (Exception e) {
             LinuxUtil.runSafeShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
-            Logger.error.println("Failed to load file <'" + getFile().getAbsolutePath() + "'>", "Creating Backup of the old file", e);
+            e.printStackTrace();
+            //Logger.error.println("Failed to load file <'" + getFile().getAbsolutePath() + "'>", "Creating Backup of the old file", e);
         } finally {
             if (!isValid()) Logger.error.println("The file <'" + getFile().getAbsolutePath() + "'> is invalid");
         }
@@ -107,7 +104,7 @@ public class PropertyFile extends Loadable implements Saveable {
 
     @Override
     public final void save() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.getFile()))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(getFile()))) {
             getComments().forEach((comment) -> {
                 try {
                     writer.write("#" + comment + "\n");

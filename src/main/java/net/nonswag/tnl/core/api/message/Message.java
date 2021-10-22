@@ -19,15 +19,13 @@ import net.nonswag.tnl.core.api.message.key.Key;
 import net.nonswag.tnl.core.api.message.key.MessageKey;
 import net.nonswag.tnl.core.api.message.key.SystemMessageKey;
 import net.nonswag.tnl.core.api.platform.PlatformPlayer;
+import net.nonswag.tnl.core.utils.LinuxUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,10 +55,9 @@ public final class Message {
         try {
             File file = new File("Core/Messages/");
             FileHelper.create(file);
-            Path source = Paths.get(from.getFile());
-            File sourceFile = source.toFile();
+            File sourceFile = new File(from.getFile());
             if (!new File(file, sourceFile.getName()).exists()) {
-                Files.copy(source, Paths.get("Core/Messages/" + sourceFile.getName()));
+                LinuxUtil.runSafeShellCommand("cp " + sourceFile.getAbsolutePath() + " " + file.getAbsolutePath() + "/" + sourceFile.getName(), null);
             }
         } catch (IOException e) {
             e.printStackTrace();
