@@ -65,7 +65,7 @@ public final class Message {
 
     @Nonnull
     public static String get(@Nonnull Key key) {
-        return key instanceof SystemMessageKey ? getRoot().getMessage(key, key.getKey()) : getEnglish().getMessage(key, key.getKey());
+        return key instanceof SystemMessageKey ? get(key, Language.ROOT) : get(key, Language.AMERICAN_ENGLISH);
     }
 
     @Nonnull

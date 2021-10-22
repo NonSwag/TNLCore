@@ -42,7 +42,7 @@ public final class SystemMessageKey extends Key {
 
     @Nonnull
     public String message() {
-        return Message.getRoot().getMessage(this, getKey());
+        return Message.get(this);
     }
 
     @Nonnull
