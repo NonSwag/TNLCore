@@ -10,6 +10,8 @@ import javax.annotation.Nullable;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.List;
 
 public class Logger {
 
@@ -100,10 +102,11 @@ public class Logger {
     }
 
     private void printStackTrace(@Nonnull Throwable throwable) {
-        StackTraceElement[] trace = throwable.getStackTrace();
+        List<StackTraceElement> trace = Arrays.asList(throwable.getStackTrace());
+        for (Throwable t : throwable.getSuppressed()) {
+            for (StackTraceElement element : t.getStackTrace()) trace.removeIf(element::equals);
+        }
         for (StackTraceElement element : trace) println("\tat " + element);
-        Throwable[] suppressed = throwable.getSuppressed();
-        for (Throwable element : suppressed) println("Suppressed: \t" + element);
         Throwable cause = throwable.getCause();
         if (cause != null) printCause(cause);
     }

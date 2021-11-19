@@ -1,6 +1,7 @@
 package net.nonswag.tnl.core.api.file.formats;
 
 import com.google.gson.*;
+import net.nonswag.tnl.core.api.file.Deletable;
 import net.nonswag.tnl.core.api.file.Loadable;
 import net.nonswag.tnl.core.api.file.Saveable;
 import net.nonswag.tnl.core.api.file.helper.FileHelper;
@@ -13,7 +14,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-public class JsonFile extends Loadable implements Saveable {
+public class JsonFile extends Loadable implements Saveable, Deletable {
 
     @Nonnull
     private JsonElement jsonElement = new JsonObject();
@@ -51,7 +52,7 @@ public class JsonFile extends Loadable implements Saveable {
             if (jsonElement instanceof JsonNull) this.jsonElement = new JsonObject();
             save();
         } catch (Exception e) {
-            LinuxUtil.runSafeShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
+            LinuxUtil.Suppressed.runShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
             Logger.error.println("Failed to load file <'" + getFile().getAbsolutePath() + "'>", "Creating Backup of the old file");
         } finally {
             if (!isValid()) Logger.error.println("The file <'" + getFile().getAbsolutePath() + "'> is invalid");
@@ -66,6 +67,11 @@ public class JsonFile extends Loadable implements Saveable {
         } catch (Exception e) {
             Logger.error.println("Failed to save file <'" + getFile().getAbsolutePath() + "'>", e.getMessage());
         }
+    }
+
+    @Override
+    public final void delete() {
+        if (isValid()) getFile().delete();
     }
 
     @Override

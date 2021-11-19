@@ -1,5 +1,6 @@
 package net.nonswag.tnl.core.api.file.formats.spearat;
 
+import net.nonswag.tnl.core.api.file.Deletable;
 import net.nonswag.tnl.core.api.file.Loadable;
 import net.nonswag.tnl.core.api.file.Saveable;
 import net.nonswag.tnl.core.api.file.helper.FileHelper;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class SeparatorFile extends Loadable implements Saveable {
+public abstract class SeparatorFile extends Loadable implements Saveable, Deletable {
 
     @Nonnull
     private List<List<String>> entries = new ArrayList<>(new ArrayList<>());
@@ -74,7 +75,7 @@ public abstract class SeparatorFile extends Loadable implements Saveable {
             });
             save();
         } catch (Exception e) {
-            LinuxUtil.runSafeShellCommand("cp " + this.getFile().getName() + " broken-" + this.getFile().getName(), this.getFile().getAbsoluteFile().getParentFile());
+            LinuxUtil.Suppressed.runShellCommand("cp " + this.getFile().getName() + " broken-" + this.getFile().getName(), this.getFile().getAbsoluteFile().getParentFile());
             Logger.error.println("Failed to load file <'" + this.getFile().getAbsolutePath() + "'>", "Creating Backup of the old file", e);
         } finally {
             if (!this.isValid()) {
@@ -91,6 +92,11 @@ public abstract class SeparatorFile extends Loadable implements Saveable {
         } catch (Exception var6) {
             Logger.error.println("Failed to save file <'" + this.getFile().getAbsolutePath() + "'>", var6);
         }
+    }
+
+    @Override
+    public final void delete() {
+        if (isValid()) getFile().delete();
     }
 
     @Nonnull

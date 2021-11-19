@@ -1,5 +1,6 @@
 package net.nonswag.tnl.core.api.file.formats;
 
+import net.nonswag.tnl.core.api.file.Deletable;
 import net.nonswag.tnl.core.api.file.Loadable;
 import net.nonswag.tnl.core.api.file.Saveable;
 import net.nonswag.tnl.core.api.file.helper.FileHelper;
@@ -12,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-public class TextFile extends Loadable implements Saveable {
+public class TextFile extends Loadable implements Saveable, Deletable {
 
     @Nonnull
     private String[] content = new String[]{};
@@ -62,7 +63,7 @@ public class TextFile extends Loadable implements Saveable {
             for (int i = 0; i < array.length; i++) getContent()[i] = (String) array[i];
             save();
         } catch (Exception e) {
-            LinuxUtil.runSafeShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
+            LinuxUtil.Suppressed.runShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
             Logger.error.println("Failed to load file <'" + getFile().getAbsolutePath() + "'>", "Creating Backup of the old file", e);
         } finally {
             if (!this.isValid()) {
@@ -87,6 +88,11 @@ public class TextFile extends Loadable implements Saveable {
         } catch (Exception e) {
             Logger.error.println("Failed to save file <'" + getFile().getAbsolutePath() + "'>", e);
         }
+    }
+
+    @Override
+    public final void delete() {
+        if (isValid()) getFile().delete();
     }
 
     @Override

@@ -9,39 +9,53 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public final class LinuxUtil {
-
-    private static boolean print = false;
+public class LinuxUtil {
 
     private LinuxUtil() {
     }
 
-    public static boolean isPrint() {
-        return print;
+    public static void runShellCommand(@Nonnull String command) throws IOException, InterruptedException {
+        runShellCommand(command, Logger.debug);
     }
 
-    public static void setPrint(boolean print) {
-        LinuxUtil.print = print;
+    public static void runShellCommand(@Nonnull String command, @Nonnull Logger logger) throws IOException, InterruptedException {
+        runShellCommand(command, null, logger);
     }
 
-    public static void runShellCommand(@Nonnull String command, @Nullable File directory) throws IOException, InterruptedException {
+    public static void runShellCommand(@Nonnull String command, @Nonnull File directory) throws IOException, InterruptedException {
+        runShellCommand(command, directory, Logger.debug);
+    }
+
+    public static void runShellCommand(@Nonnull String command, @Nullable File directory, @Nonnull Logger logger) throws IOException, InterruptedException {
         Process process = directory == null ? Runtime.getRuntime().exec(command) : Runtime.getRuntime().exec(command, null, directory);
         BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        if (isPrint()) {
-            String string;
-            Logger.info.println("Executing: " + command);
-            while ((string = br.readLine()) != null) Logger.info.println(string);
-        }
+        String string;
+        logger.println("Executing: " + command);
+        while ((string = br.readLine()) != null) logger.println(string);
         process.waitFor();
-        if (isPrint()) Logger.info.println("Finished program with exit code: " + process.exitValue());
-        process.destroy();
+        logger.println("Finished program with exit code: " + process.exitValue());
     }
 
-    public static void runSafeShellCommand(@Nonnull String command, @Nullable File directory) {
-        try {
-            runShellCommand(command, directory);
-        } catch (IOException | InterruptedException e) {
-            Logger.error.println(e.getMessage());
+    public static class Suppressed {
+
+        public static void runShellCommand(@Nonnull String command) {
+            runShellCommand(command, Logger.debug);
+        }
+
+        public static void runShellCommand(@Nonnull String command, @Nonnull Logger logger) {
+            runShellCommand(command, null, logger);
+        }
+
+        public static void runShellCommand(@Nonnull String command, @Nonnull File directory) {
+            runShellCommand(command, directory, Logger.debug);
+        }
+
+        public static void runShellCommand(@Nonnull String command, @Nullable File directory, @Nonnull Logger logger) {
+            try {
+                LinuxUtil.runShellCommand(command, directory, logger);
+            } catch (IOException | InterruptedException e) {
+                Logger.error.println(e.getMessage());
+            }
         }
     }
 }

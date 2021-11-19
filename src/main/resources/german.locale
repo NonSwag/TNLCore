@@ -16,4 +16,4 @@ unknown-player=%prefix%§4 %player%§c ist uns nicht bekannt
 connecting-to-server=%prefix%§a Verbinde dich zum server §6%server%
 unknown-server=%prefix% §cDer server §4%server%§c existiert nicht
 failed-to-connect-to-server=%prefix% §cDu konntest nicht zum server §4%server%§c verbunden werden
-server-is-offline=%prefix% §cDer server §4%server% ist offline
+server-is-offline=%prefix% §cDer server §4%server%§c ist offline

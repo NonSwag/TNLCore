@@ -1,5 +1,6 @@
 package net.nonswag.tnl.core.api.file.formats;
 
+import net.nonswag.tnl.core.api.file.Deletable;
 import net.nonswag.tnl.core.api.file.Loadable;
 import net.nonswag.tnl.core.api.file.Saveable;
 import net.nonswag.tnl.core.api.file.helper.FileHelper;
@@ -13,7 +14,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class PropertyFile extends Loadable implements Saveable {
+public class PropertyFile extends Loadable implements Saveable, Deletable {
 
     @Nonnull
     private final HashMap<String, String> values = new HashMap<>();
@@ -90,11 +91,10 @@ public class PropertyFile extends Loadable implements Saveable {
                     }
                 }
             });
-            this.save();
+            save();
         } catch (Exception e) {
-            LinuxUtil.runSafeShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
+            LinuxUtil.Suppressed.runShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
             e.printStackTrace();
-            //Logger.error.println("Failed to load file <'" + getFile().getAbsolutePath() + "'>", "Creating Backup of the old file", e);
         } finally {
             if (!isValid()) Logger.error.println("The file <'" + getFile().getAbsolutePath() + "'> is invalid");
         }
@@ -121,6 +121,11 @@ public class PropertyFile extends Loadable implements Saveable {
         } catch (Exception var6) {
             Logger.error.println("Failed to save file <'" + getFile().getAbsolutePath() + "'>", var6);
         }
+    }
+
+    @Override
+    public final void delete() {
+        if (isValid()) getFile().delete();
     }
 
     public void setValueIfAbsent(@Nonnull String key, @Nonnull String value) {

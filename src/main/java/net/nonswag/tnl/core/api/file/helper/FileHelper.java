@@ -52,11 +52,11 @@ public final class FileHelper {
             if (files != null) {
                 for (File file : files) {
                     if (file.isDirectory()) deleteContentAndSelf(file);
-                    else LinuxUtil.runSafeShellCommand("rm " + file.getAbsolutePath(), null);
+                    else LinuxUtil.Suppressed.runShellCommand("rm " + file.getAbsolutePath());
                 }
             }
-            LinuxUtil.runSafeShellCommand("rmdir " + directory.getAbsolutePath(), null);
-        } else LinuxUtil.runSafeShellCommand("rm " + directory.getAbsolutePath(), null);
+            LinuxUtil.Suppressed.runShellCommand("rmdir " + directory.getAbsolutePath());
+        } else LinuxUtil.Suppressed.runShellCommand("rm " + directory.getAbsolutePath());
     }
 
     public static void copyResourceFile(@Nonnull Class<?> clazz, @Nonnull String resource, @Nonnull String destination, boolean override) {

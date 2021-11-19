@@ -1,17 +1,19 @@
 package net.nonswag.tnl.core.api.reflection;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.nonswag.tnl.core.api.logger.Logger;
 import net.nonswag.tnl.core.api.object.Objects;
-import net.nonswag.tnl.core.api.object.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public final class Reflection {
 
@@ -19,27 +21,32 @@ public final class Reflection {
     }
 
     @Nonnull
-    public static Object createInstance(@Nonnull Class<?> clazz) {
-        return createInstance(clazz, new Object[]{});
+    public static Object createInstance(@Nonnull Class<?> clazz, @Nonnull Object... parameters) throws ReflectionException {
+        List<Class<?>> args = new ArrayList<>();
+        for (Object parameter : parameters) args.add(parameter.getClass());
+        return createInstance(clazz, parameters, args.toArray(new Class[]{}));
     }
 
-    public static Object createInstance(@Nonnull Class<?> clazz, @Nullable Object[] args, @Nullable Class<?>... parameters) {
+    @Nonnull
+    public static Object createInstance(@Nonnull Class<?> clazz, @Nullable Object[] parameters, @Nullable Class<?>[] args) {
         try {
-            return clazz.getConstructor(parameters).newInstance(args);
+            return clazz.getConstructor(args).newInstance(parameters);
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
-            Logger.error.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new ReflectionException(e);
         }
     }
 
     @Nonnull
-    public static Object createInstance(@Nonnull String link) {
-        return createInstance(link, new Object[]{});
+    public static Object createInstance(@Nonnull String link, @Nonnull Object... parameters) throws ReflectionException {
+        Class<?> aClass = getClass(link);
+        if (aClass == null) throw new ReflectionException();
+        return createInstance(aClass, parameters);
     }
 
-    public static Object createInstance(@Nonnull String link, @Nullable Object[] args, @Nullable Class<?>... parameters) {
+    @Nonnull
+    public static Object createInstance(@Nonnull String link, @Nullable Object[] args, @Nullable Class<?>[] parameters) throws ReflectionException {
         Class<?> aClass = getClass(link);
-        if (aClass == null) throw new NullPointerException();
+        if (aClass == null) throw new ReflectionException();
         return createInstance(aClass, args, parameters);
     }
 
@@ -49,6 +56,13 @@ public final class Reflection {
             return Class.forName(link);
         } catch (ClassNotFoundException e) {
             return null;
+        }
+    }
+
+    public static <T> void deepCopy(@Nullable T origin, @Nullable T copy) {
+        if (origin == null || copy == null || origin == copy) return;
+        for (String field : getFields(origin.getClass())) {
+            setField(copy, field, Reflection.getField(origin, field).getValue());
         }
     }
 
@@ -129,10 +143,11 @@ public final class Reflection {
             Field declaredField = superclass.getDeclaredField(field);
             declaredField.setAccessible(true);
             return new Objects<>((P) declaredField.get(object));
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            Logger.error.println(e);
-            return new Objects<>();
+        } catch (NoSuchFieldException e) {
+            Logger.debug.println("The field <" + field + "> does not exist");
+        } catch (Exception ignored) {
         }
+        return new Objects<>();
     }
 
     public static boolean hasField(@Nonnull Object object, @Nonnull String field) {
@@ -141,7 +156,20 @@ public final class Reflection {
 
     public static boolean hasField(@Nonnull Object object, @Nonnull Class<?> superclass, @Nonnull String field) {
         try {
-            Object o = superclass.getDeclaredField(field).get(object);
+            superclass.getDeclaredField(field).get(object);
+            return true;
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            return false;
+        }
+    }
+
+    public static boolean hasStaticField(@Nonnull Object object, @Nonnull String field) {
+        return hasStaticField(object, object.getClass(), field);
+    }
+
+    public static boolean hasStaticField(@Nonnull Object object, @Nonnull Class<?> superclass, @Nonnull String field) {
+        try {
+            superclass.getField(field).get(object);
             return true;
         } catch (IllegalAccessException | NoSuchFieldException e) {
             return false;
@@ -165,32 +193,100 @@ public final class Reflection {
     }
 
     @Nonnull
-    public static JsonObject toJsonObject(@Nonnull Object clazz) {
+    public static JsonObject toJsonObject(@Nonnull Object instance) {
         JsonObject object = new JsonObject();
-        JsonObject fields = new JsonObject();
-        for (String field : getFields(clazz.getClass())) {
-            Objects<?> o = getField(clazz, field);
-            if (o.getValue() instanceof Pair<?, ?> pair) {
-                if ((pair.getValue() instanceof String)) {
-                    fields.addProperty(pair.getKey().toString(), ((String) pair.getValue()));
-                } else if ((pair.getValue() instanceof Number)) {
-                    fields.addProperty(pair.getKey().toString(), ((Number) pair.getValue()));
-                } else if ((pair.getValue() instanceof Boolean)) {
-                    fields.addProperty(pair.getKey().toString(), ((Boolean) pair.getValue()));
-                } else if ((pair.getValue() instanceof Character)) {
-                    fields.addProperty(pair.getKey().toString(), ((Character) pair.getValue()));
-                }
-            } else fields.addProperty(field, o.hasValue() ? o.nonnull().toString() : "");
-        }
-        object.add(clazz.getClass().getSimpleName(), fields);
+        addFields(object, instance.getClass().getName(), instance);
         return object;
+    }
+
+    private static void addFields(@Nonnull JsonArray jsonArray, @Nonnull Object object) {
+        if (object instanceof StringBuilder builder) jsonArray.add(builder.toString());
+        else if (object instanceof String string) jsonArray.add(string);
+        else if (object instanceof Number number) jsonArray.add(number);
+        else if (object instanceof Boolean b) jsonArray.add(b);
+        else if (object instanceof Character c) jsonArray.add(c);
+        else jsonArray.add(toJsonObject(object));
+    }
+
+    private static void addFields(@Nonnull JsonObject jsonObject, @Nonnull String name, @Nullable Object object) {
+        try {
+            if (object == null) jsonObject.add(name, null);
+            else if (object instanceof StringBuilder builder) jsonObject.addProperty(name, builder.toString());
+            else if (object instanceof String string) jsonObject.addProperty(name, string);
+            else if (object instanceof Number number) jsonObject.addProperty(name, number);
+            else if (object instanceof Boolean b) jsonObject.addProperty(name, b);
+            else if (object instanceof Character c) jsonObject.addProperty(name, c);
+            else if (object instanceof Map map) {
+                JsonArray array = new JsonArray();
+                JsonObject root = new JsonObject();
+                for (Object key : map.keySet()) {
+                    JsonObject keySet = new JsonObject();
+                    addFields(keySet, "key", key);
+                    addFields(keySet, "value", map.get(key));
+                    array.add(keySet);
+                }
+                root.add(map.getClass().getName(), array);
+                jsonObject.add(name, root);
+            } else if (object instanceof Object[] list) {
+                JsonArray array = new JsonArray();
+                for (Object o : list) addFields(array, o);
+                jsonObject.add(name, array);
+            } else if (object instanceof List list) {
+                JsonArray array = new JsonArray();
+                for (Object o : list) addFields(array, o);
+                jsonObject.add(name, array);
+            } else {
+                JsonObject o = new JsonObject();
+                for (Class<?> clazz : getConnectingClasses(object.getClass())) {
+                    for (String field : getFields(clazz)) {
+                        addFields(o, field, getField(object, clazz, Object.class, field).getValue());
+                    }
+                }
+                jsonObject.add(name, o);
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    @Nonnull
+    public static List<Class<?>> getConnectingClasses(@Nonnull Class<?> clazz) {
+        List<Class<?>> classes = new ArrayList<>();
+        if (clazz.getSuperclass() == null) classes.add(clazz);
+        else classes.addAll(getConnectingClasses(clazz.getSuperclass()));
+        if (!classes.contains(clazz)) classes.add(clazz);
+        classes.remove(Object.class);
+        return classes;
+    }
+
+    @Nonnull
+    public static List<String> getFieldsRecursive(@Nonnull Class<?> clazz) {
+        List<String> fields = new ArrayList<>();
+        for (Class<?> superclass : getConnectingClasses(clazz)) fields.addAll(getFields(superclass));
+        return fields;
+    }
+
+    @Nonnull
+    public static List<String> getStaticFieldsRecursive(@Nonnull Class<?> clazz) {
+        List<String> fields = new ArrayList<>();
+        for (Class<?> superclass : getConnectingClasses(clazz)) fields.addAll(getStaticFields(superclass));
+        return fields;
     }
 
     @Nonnull
     public static List<String> getFields(@Nonnull Class<?> clazz) {
         List<String> fields = new ArrayList<>();
-        for (Field field : clazz.getDeclaredFields()) fields.add(field.getName());
-        for (Field field : clazz.getFields()) fields.add(field.getName());
+        for (Field field : clazz.getDeclaredFields()) {
+            if (!Modifier.isStatic(field.getModifiers())) fields.add(field.getName());
+        }
+        return fields;
+    }
+
+    @Nonnull
+    public static List<String> getStaticFields(@Nonnull Class<?> clazz) {
+        List<String> fields = new ArrayList<>();
+        for (Field field : clazz.getDeclaredFields()) {
+            if (Modifier.isStatic(field.getModifiers())) fields.add(field.getName());
+        }
         return fields;
     }
 }
