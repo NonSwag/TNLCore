@@ -51,4 +51,12 @@ public class MathUtil {
     public static long randomLong(long from, long to) {
         return ((from + (to - from)) * (new Random().nextLong()));
     }
+
+    public static double factorial(int number) {
+        boolean negative = number < 0;
+        if (negative) number = -number;
+        double result = number;
+        for (double d = number - 1; d > 0; d--) result *= d;
+        return (negative ? -result : result);
+    }
 }
