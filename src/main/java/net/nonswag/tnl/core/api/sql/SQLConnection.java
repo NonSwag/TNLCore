@@ -93,15 +93,15 @@ public class SQLConnection implements AutoCloseable, Duplicable {
     }
 
     public final void createTable(@Nonnull String name, @Nonnull Parameter... parameters) {
-        if (parameters.length == 0) executeUpdate("CREATE TABLE IF NOT EXISTS " + name);
+        if (parameters.length == 0) executeUpdate("CREATE TABLE IF NOT EXISTS `" + getDatabase() + "`.`" + name + "`");
         else {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < parameters.length; i++) {
                 Pair<String, String> parameter = parameters[i];
-                builder.append(parameter.getKey()).append(", ").append(parameter.getValue());
+                builder.append("`").append(parameter.getKey()).append("`").append(", ").append(parameter.getValue());
                 if (i + 1 < parameters.length) builder.append(", ");
             }
-            executeUpdate("CREATE TABLE IF NOT EXISTS " + name + " (" + builder + ")");
+            executeUpdate("CREATE TABLE IF NOT EXISTS `" + getDatabase() + "`.`" + name + "` (" + builder + ")");
         }
     }
 
