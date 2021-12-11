@@ -1,5 +1,6 @@
 package net.nonswag.tnl.core.api.sql;
 
+import net.nonswag.tnl.core.api.errors.TNLRuntimeException;
 import net.nonswag.tnl.core.api.logger.Logger;
 import net.nonswag.tnl.core.api.object.Duplicable;
 import net.nonswag.tnl.core.api.object.Pair;
@@ -93,12 +94,12 @@ public class SQLConnection implements AutoCloseable, Duplicable {
     }
 
     public final void createTable(@Nonnull String name, @Nonnull Parameter... parameters) {
-        if (parameters.length == 0) executeUpdate("CREATE TABLE IF NOT EXISTS `" + getDatabase() + "`.`" + name + "`");
+        if (parameters.length == 0) throw new TNLRuntimeException("A table must have at least one row");
         else {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < parameters.length; i++) {
                 Pair<String, String> parameter = parameters[i];
-                builder.append("`").append(parameter.getKey()).append("`").append(", ").append(parameter.getValue());
+                builder.append("`").append(parameter.getKey()).append("` ").append(parameter.getValue());
                 if (i + 1 < parameters.length) builder.append(", ");
             }
             executeUpdate("CREATE TABLE IF NOT EXISTS `" + getDatabase() + "`.`" + name + "` (" + builder + ")");
