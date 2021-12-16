@@ -1,13 +1,14 @@
 package net.nonswag.tnl.core.api.file.helper;
 
+import net.nonswag.tnl.core.api.errors.DownloadException;
 import net.nonswag.tnl.core.api.logger.Logger;
 
 import javax.annotation.Nonnull;
-import javax.net.ssl.HttpsURLConnection;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 public final class FileDownloader {
@@ -15,35 +16,34 @@ public final class FileDownloader {
     private FileDownloader() {
     }
 
+    public static void main(String[] args) throws IOException {
+        download("https://www.thenextlvl.net/static/plugins/TNLListener.jar", new File("Core"));
+    }
+
     public static void download(@Nonnull URL url, @Nonnull File directory) throws IOException {
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         connection.setConnectTimeout(3000);
         connection.setReadTimeout(3000);
         connection.connect();
         int responseCode = connection.getResponseCode();
-        if (responseCode == HttpsURLConnection.HTTP_OK) {
-            String fileName = null;
+        if (responseCode == HttpURLConnection.HTTP_OK) {
             String disposition = connection.getHeaderField("Content-Disposition");
-            String contentType = connection.getContentType();
-            int contentLength = connection.getContentLength();
-            if (disposition != null) {
-                int index = disposition.indexOf("filename=");
-                if (index > 0) fileName = disposition.substring(index + 10, disposition.length() - 1);
-            } else fileName = url.toString().substring(url.toString().lastIndexOf("/") + 1);
-            if (fileName != null) {
-                InputStream inputStream = connection.getInputStream();
-                File file = new File(directory.getAbsolutePath(), fileName);
-                FileHelper.create(file);
-                FileOutputStream outputStream = new FileOutputStream(file);
-                int bytesRead;
-                byte[] buffer = new byte[4096];
-                Logger.debug.println("Starting download of file <'" + fileName + "'>");
-                while ((bytesRead = inputStream.read(buffer)) != -1) outputStream.write(buffer, 0, bytesRead);
-                outputStream.close();
-                inputStream.close();
-                Logger.debug.println("Successfully downloaded file <'" + fileName + "'>");
-            } else Logger.debug.println("No file was found");
+            if (disposition == null) throw new DownloadException("content disposition is missing");
+            if (!disposition.contains("filename=")) throw new DownloadException("no filename found");
+            String[] split = disposition.split("filename=");
+            String fileName = split[1].split(" ")[0];
+            InputStream inputStream = connection.getInputStream();
+            File file = new File(directory.getAbsolutePath(), fileName);
+            FileHelper.create(file);
+            FileOutputStream outputStream = new FileOutputStream(file);
+            int bytesRead;
+            byte[] buffer = new byte[4096];
+            Logger.debug.println("Starting download of file <'" + fileName + "'>");
+            while ((bytesRead = inputStream.read(buffer)) != -1) outputStream.write(buffer, 0, bytesRead);
+            outputStream.close();
+            inputStream.close();
+            Logger.debug.println("Successfully downloaded file <'" + fileName + "'>");
         } else Logger.error.println("No file was found. Server replied HTTP code: " + responseCode);
         connection.disconnect();
     }
