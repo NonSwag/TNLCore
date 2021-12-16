@@ -16,13 +16,9 @@ public final class FileDownloader {
     private FileDownloader() {
     }
 
-    public static void main(String[] args) throws IOException {
-        download("https://www.thenextlvl.net/static/plugins/TNLListener.jar", new File("Core"));
-    }
-
     public static void download(@Nonnull URL url, @Nonnull File directory) throws IOException {
+        System.out.println(url);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
         connection.setConnectTimeout(3000);
         connection.setReadTimeout(3000);
         connection.connect();
