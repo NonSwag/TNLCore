@@ -12,22 +12,18 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
-public class Logger {
-
-    @Nonnull
-    private static final PrintStream out = new PrintStream(new FileOutputStream(FileDescriptor.out), true);
-    @Nonnull
-    private static final PrintStream err = new PrintStream(new FileOutputStream(FileDescriptor.err), true);
+public class Logger extends PrintStream {
 
     @Nonnull
-    public static final Logger info = new Logger("info", SystemMessageKey.LOG_INFO::message, out).colorize(Color.LIME, Color.GOLD);
+    public static final Logger info = new Logger("info", SystemMessageKey.LOG_INFO::message, FileDescriptor.out).colorize(Color.LIME, Color.GOLD);
     @Nonnull
-    public static final Logger warn = new Logger("warn", SystemMessageKey.LOG_WARN::message, out).colorize(Color.YELLOW, Color.WHITE);
+    public static final Logger warn = new Logger("warn", SystemMessageKey.LOG_WARN::message, FileDescriptor.out).colorize(Color.YELLOW, Color.WHITE);
     @Nonnull
-    public static final Logger debug = new Logger("debug", SystemMessageKey.LOG_DEBUG::message, out).colorize(Color.YELLOW, Color.GOLD);
+    public static final Logger debug = new Logger("debug", SystemMessageKey.LOG_DEBUG::message, FileDescriptor.out).colorize(Color.YELLOW, Color.GOLD);
     @Nonnull
-    public static final Logger error = new Logger("error", SystemMessageKey.LOG_ERROR::message, err).colorize(Color.RED, Color.DARK_RED);
+    public static final Logger error = new Logger("error", SystemMessageKey.LOG_ERROR::message, FileDescriptor.err).colorize(Color.RED, Color.DARK_RED);
 
     @Nonnull
     private final String name;
@@ -38,14 +34,12 @@ public class Logger {
     @Nonnull
     private Color secondaryColor = Color.RESET;
     @Nonnull
-    private final PrintStream printStream;
-    @Nonnull
     private Condition condition = () -> true;
 
-    public Logger(@Nonnull String name, @Nonnull Getter<String> prefix, @Nonnull PrintStream printStream) {
+    public Logger(@Nonnull String name, @Nonnull Getter<String> prefix, @Nonnull FileDescriptor descriptor) {
+        super(new FileOutputStream(descriptor), true);
         this.name = name;
         this.prefix = prefix;
-        this.printStream = printStream;
     }
 
     @Nonnull
@@ -66,11 +60,6 @@ public class Logger {
     @Nonnull
     public Color getSecondaryColor() {
         return secondaryColor;
-    }
-
-    @Nonnull
-    private PrintStream getPrintStream() {
-        return printStream;
     }
 
     @Nonnull
@@ -121,7 +110,62 @@ public class Logger {
         if (cause != null) printCause(cause);
     }
 
+
+    @Override
+    public void println() {
+        super.println();
+    }
+
+    @Override
+    public void println(boolean x) {
+        _println(x);
+    }
+
+    @Override
+    public void println(char x) {
+        _println(x);
+    }
+
+    @Override
+    public void println(int x) {
+        _println(x);
+    }
+
+    @Override
+    public void println(long x) {
+        _println(x);
+    }
+
+    @Override
+    public void println(float x) {
+        _println(x);
+    }
+
+    @Override
+    public void println(double x) {
+        _println(x);
+    }
+
+    @Override
+    public void println(@Nonnull char[] x) {
+        _println(Arrays.toString(x));
+    }
+
+    @Override
+    public void println(@Nullable String x) {
+        _println(x);
+    }
+
+    @Override
+    public void println(@Nullable Object x) {
+        _println(x);
+    }
+
     public void println(@Nonnull Object... values) {
+        _println(values);
+    }
+
+    private void _println(@Nonnull Object... values) {
         if (!getCondition().check()) return;
         for (@Nullable Object value : values) {
             if (value == null) continue;
@@ -139,8 +183,8 @@ public class Logger {
                         replace("<", "§8<%1%").replace("»", "§8»%1%").replace("«", "§8«%1%").
                         replace("%1%", getMainColor().getCode()).replace("%2%", getSecondaryColor().getCode());
                 String prefix = Color.replace(getPrefix().get());
-                if (prefix.isEmpty()) getPrintStream().println(Message.format(Color.replace(text + "§r")));
-                else getPrintStream().println(Color.replace(Message.format(prefix + " " + text + "§r")));
+                if (prefix.isEmpty()) super.println(Message.format(Color.replace(text + "§r")));
+                else super.println(Color.replace(Message.format(prefix + " " + text + "§r")));
             }
         }
     }
@@ -150,6 +194,11 @@ public class Logger {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Logger logger = (Logger) o;
-        return name.equals(logger.name);
+        return name.equals(logger.name) && prefix.equals(logger.prefix) && mainColor == logger.mainColor && secondaryColor == logger.secondaryColor && condition.equals(logger.condition);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, prefix, mainColor, secondaryColor, condition);
     }
 }
