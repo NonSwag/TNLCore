@@ -32,19 +32,11 @@ public class LinuxUtil {
         runShellCommand(command.split(" "), directory, logger);
     }
 
-    public static void runShellCommand(@Nonnull String[] command) throws IOException, InterruptedException {
-        runShellCommand(command, Logger.debug);
+    private static void runShellCommand(@Nonnull String[] command) throws IOException, InterruptedException {
+        runShellCommand(command, null, Logger.debug);
     }
 
-    public static void runShellCommand(@Nonnull String[] command, @Nonnull Logger logger) throws IOException, InterruptedException {
-        runShellCommand(command, null, logger);
-    }
-
-    public static void runShellCommand(@Nonnull String[] command, @Nonnull File directory) throws IOException, InterruptedException {
-        runShellCommand(command, directory, Logger.debug);
-    }
-
-    public static void runShellCommand(@Nonnull String[] command, @Nullable File directory, @Nonnull Logger logger) throws IOException, InterruptedException {
+    private static void runShellCommand(@Nonnull String[] command, @Nullable File directory, @Nonnull Logger logger) throws IOException, InterruptedException {
         if (command.length == 0) return;
         Process process = directory == null ? Runtime.getRuntime().exec(command) : Runtime.getRuntime().exec(command, null, directory);
         BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -79,26 +71,6 @@ public class LinuxUtil {
         }
 
         public static void runShellCommand(@Nonnull String command, @Nullable File directory, @Nonnull Logger logger) {
-            try {
-                LinuxUtil.runShellCommand(command, directory, logger);
-            } catch (IOException | InterruptedException e) {
-                Logger.error.println(e.getMessage());
-            }
-        }
-
-        public static void runShellCommand(@Nonnull String[] command) {
-            runShellCommand(command, Logger.debug);
-        }
-
-        public static void runShellCommand(@Nonnull String[] command, @Nonnull Logger logger) {
-            runShellCommand(command, null, logger);
-        }
-
-        public static void runShellCommand(@Nonnull String[] command, @Nonnull File directory) {
-            runShellCommand(command, directory, Logger.debug);
-        }
-
-        public static void runShellCommand(@Nonnull String[] command, @Nullable File directory, @Nonnull Logger logger) {
             try {
                 LinuxUtil.runShellCommand(command, directory, logger);
             } catch (IOException | InterruptedException e) {
