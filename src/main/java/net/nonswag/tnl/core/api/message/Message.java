@@ -94,6 +94,11 @@ public final class Message {
         return format(text, null, placeholders);
     }
 
+    @Nonnull
+    public static String format(@Nonnull String text, @Nonnull List<Placeholder> placeholders) {
+        return format(text, null, placeholders.toArray(new Placeholder[]{}));
+    }
+
     public static void init() {
         File[] files = new File("Core/Messages/").listFiles();
         List<Language> languages = new ArrayList<>();

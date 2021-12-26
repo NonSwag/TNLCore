@@ -8,7 +8,7 @@ import java.text.DecimalFormat;
 public final class StringUtil {
 
     @Nonnull
-    public static String VALID_CHARS = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
+    public static String VALID_CHARS = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
 
     private StringUtil() {
     }

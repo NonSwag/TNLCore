@@ -44,12 +44,12 @@ public class TextFile extends Loadable implements Saveable, Deletable {
     }
 
     @Nonnull
-    public final TextFile setSort(boolean sort) {
+    public TextFile setSort(boolean sort) {
         this.sort = sort;
         return this;
     }
 
-    public final boolean isSort() {
+    public boolean isSort() {
         return sort;
     }
 
