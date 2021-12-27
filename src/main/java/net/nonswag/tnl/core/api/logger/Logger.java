@@ -3,6 +3,7 @@ package net.nonswag.tnl.core.api.logger;
 import net.nonswag.tnl.core.api.message.Message;
 import net.nonswag.tnl.core.api.message.key.SystemMessageKey;
 import net.nonswag.tnl.core.api.object.Condition;
+import net.nonswag.tnl.core.api.object.Duplicable;
 import net.nonswag.tnl.core.api.object.Getter;
 
 import javax.annotation.Nonnull;
@@ -14,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class Logger extends PrintStream {
+public class Logger extends PrintStream implements Duplicable {
 
     @Nonnull
     public static final Logger info = new Logger("info", SystemMessageKey.LOG_INFO::message, FileDescriptor.out).colorize(Color.LIME, Color.GOLD);
@@ -35,11 +36,14 @@ public class Logger extends PrintStream {
     private Color secondaryColor = Color.RESET;
     @Nonnull
     private Condition condition = () -> true;
+    @Nonnull
+    private final FileDescriptor descriptor;
 
     public Logger(@Nonnull String name, @Nonnull Getter<String> prefix, @Nonnull FileDescriptor descriptor) {
         super(new FileOutputStream(descriptor), true);
         this.name = name;
         this.prefix = prefix;
+        this.descriptor = descriptor;
     }
 
     @Nonnull
@@ -65,6 +69,11 @@ public class Logger extends PrintStream {
     @Nonnull
     public Condition getCondition() {
         return condition;
+    }
+
+    @Nonnull
+    public FileDescriptor getDescriptor() {
+        return descriptor;
     }
 
     @Nonnull
@@ -165,6 +174,12 @@ public class Logger extends PrintStream {
         _println(values);
     }
 
+    @Override
+    public PrintStream append(char c) {
+        println(c);
+        return this;
+    }
+
     private void _println(@Nonnull Object... values) {
         if (!getCondition().check()) return;
         for (@Nullable Object value : values) {
@@ -200,5 +215,13 @@ public class Logger extends PrintStream {
     @Override
     public int hashCode() {
         return Objects.hash(name, prefix, mainColor, secondaryColor, condition);
+    }
+
+    @Nonnull
+    @Override
+    public Logger duplicate() {
+        Logger logger = new Logger(getName() + " (copy)", getPrefix(), getDescriptor());
+        logger.setCondition(getCondition()).setMainColor(getMainColor()).setSecondaryColor(getSecondaryColor());
+        return logger;
     }
 }

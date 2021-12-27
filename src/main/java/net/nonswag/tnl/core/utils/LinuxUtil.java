@@ -16,6 +16,22 @@ public class LinuxUtil {
     private LinuxUtil() {
     }
 
+    public static void runShellCommandUnmodified(@Nonnull String command) throws IOException, InterruptedException {
+        runShellCommandUnmodified(command, Logger.debug);
+    }
+
+    public static void runShellCommandUnmodified(@Nonnull String command, @Nonnull Logger logger) throws IOException, InterruptedException {
+        runShellCommandUnmodified(command, null, logger);
+    }
+
+    public static void runShellCommandUnmodified(@Nonnull String command, @Nonnull File directory) throws IOException, InterruptedException {
+        runShellCommandUnmodified(command, directory, Logger.debug);
+    }
+
+    public static void runShellCommandUnmodified(@Nonnull String command, @Nullable File directory, @Nonnull Logger logger) throws IOException, InterruptedException {
+        runShellCommand(new String[]{command}, directory, logger);
+    }
+
     public static void runShellCommand(@Nonnull String command) throws IOException, InterruptedException {
         runShellCommand(command, Logger.debug);
     }
@@ -38,7 +54,14 @@ public class LinuxUtil {
 
     private static void runShellCommand(@Nonnull String[] command, @Nullable File directory, @Nonnull Logger logger) throws IOException, InterruptedException {
         if (command.length == 0) return;
-        Process process = directory == null ? Runtime.getRuntime().exec(command) : Runtime.getRuntime().exec(command, null, directory);
+        Process process;
+        if (directory == null) {
+            if (command.length == 1) process = Runtime.getRuntime().exec(command[0]);
+            else process = Runtime.getRuntime().exec(command);
+        } else {
+            if (command.length == 1) process = Runtime.getRuntime().exec(command[0], null, directory);
+            else process = Runtime.getRuntime().exec(command, null, directory);
+        }
         BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String string;
         while ((string = br.readLine()) != null) logger.println(string);
@@ -57,6 +80,26 @@ public class LinuxUtil {
     }
 
     public static class Suppressed {
+
+        public static void runShellCommandUnmodified(@Nonnull String command) {
+            runShellCommandUnmodified(command, Logger.debug);
+        }
+
+        public static void runShellCommandUnmodified(@Nonnull String command, @Nonnull Logger logger) {
+            runShellCommandUnmodified(command, null, logger);
+        }
+
+        public static void runShellCommandUnmodified(@Nonnull String command, @Nonnull File directory) {
+            runShellCommandUnmodified(command, directory, Logger.debug);
+        }
+
+        public static void runShellCommandUnmodified(@Nonnull String command, @Nullable File directory, @Nonnull Logger logger) {
+            try {
+                LinuxUtil.runShellCommandUnmodified(command, directory, logger);
+            } catch (IOException | InterruptedException e) {
+                Logger.error.println(e.getMessage());
+            }
+        }
 
         public static void runShellCommand(@Nonnull String command) {
             runShellCommand(command, Logger.debug);
