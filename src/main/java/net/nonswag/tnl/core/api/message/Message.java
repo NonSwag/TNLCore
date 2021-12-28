@@ -20,7 +20,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public final class Message {
@@ -68,9 +67,11 @@ public final class Message {
 
     @Nonnull
     public static String format(@Nonnull String text, @Nullable PlatformPlayer player, @Nonnull Placeholder... placeholders) {
-        List<Placeholder> list = Registry.placeholders();
-        list.addAll(Arrays.asList(placeholders));
-        for (Placeholder p : list) {
+        for (Placeholder p : placeholders) {
+            if (!text.contains("%" + p.placeholder() + "%")) continue;
+            text = text.replace("%" + p.placeholder() + "%", player == null ? p.value() : p.value(player));
+        }
+        for (Placeholder p : Registry.placeholders()) {
             if (!text.contains("%" + p.placeholder() + "%")) continue;
             text = text.replace("%" + p.placeholder() + "%", player == null ? p.value() : p.value(player));
         }
