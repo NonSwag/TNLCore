@@ -1,10 +1,8 @@
 package net.nonswag.tnl.core.api.message;
 
-import net.nonswag.tnl.core.api.logger.Logger;
-import net.nonswag.tnl.core.api.message.formulary.Formulary;
-import net.nonswag.tnl.core.api.message.formulary.PlayerFormulary;
-import net.nonswag.tnl.core.api.message.formulary.VoidFormulary;
 import net.nonswag.tnl.core.api.message.key.SystemMessageKey;
+import net.nonswag.tnl.core.api.object.Getter;
+import net.nonswag.tnl.core.api.object.MutualGetter;
 import net.nonswag.tnl.core.api.platform.PlatformPlayer;
 
 import javax.annotation.Nonnull;
@@ -15,116 +13,95 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
-public record Placeholder(@Nonnull String placeholder, @Nonnull Object object) {
+public class Placeholder {
+
+    @Nonnull
+    private final String placeholder;
+    @Nullable
+    private final Getter<Object> object;
+    @Nullable
+    private final MutualGetter<PlatformPlayer, Object> mutualObject;
+
+    public Placeholder(@Nonnull String placeholder, @Nullable Object object) {
+        this(placeholder, () -> object == null ? "§8-§7/§8-§r" : object);
+    }
+
+    public Placeholder(@Nonnull String placeholder, @Nonnull Getter<Object> object) {
+        this.placeholder = placeholder;
+        this.mutualObject = null;
+        this.object = object;
+    }
+
+    public Placeholder(@Nonnull String placeholder, @Nonnull MutualGetter<PlatformPlayer, Object> object) {
+        this.placeholder = placeholder;
+        this.mutualObject = object;
+        this.object = null;
+    }
+
+    @Nonnull
+    public String placeholder() {
+        return placeholder;
+    }
+
+    @Nonnull
+    public String value() {
+        return object == null ? "null" : object.getAsString();
+    }
+
+    @Nonnull
+    public String value(@Nonnull PlatformPlayer player) {
+        return mutualObject == null ? value() : mutualObject.getAsString(player);
+    }
 
     public static class Registry {
 
         @Nonnull
-        private static final HashMap<String, String> PLACEHOLDERS = new HashMap<>();
-        @Nonnull
-        private static final List<Formulary<?>> FORMULARY = new ArrayList<>();
+        private static final HashMap<String, Placeholder> PLACEHOLDERS = new HashMap<>();
 
         @Nonnull
-        static List<String> values() {
-            return new ArrayList<>(PLACEHOLDERS.keySet());
-        }
-
-        @Nonnull
-        static List<Formulary<?>> formularies() {
-            return new ArrayList<>(FORMULARY);
+        static List<Placeholder> placeholders() {
+            return new ArrayList<>(PLACEHOLDERS.values());
         }
 
         public static boolean isRegistered(@Nonnull String placeholder) {
             return PLACEHOLDERS.containsKey(placeholder);
         }
 
+        public static boolean isRegistered(@Nonnull Placeholder placeholder) {
+            return isRegistered(placeholder.placeholder());
+        }
+
         public static void register(@Nonnull Placeholder placeholder) {
-            if (!PLACEHOLDERS.containsKey(placeholder.placeholder())) {
-                PLACEHOLDERS.put(placeholder.placeholder(), placeholder.object().toString());
-            } else {
-                Logger.error.println("A static placeholder named <'" + placeholder.placeholder() + "'> is already registered");
-            }
+            PLACEHOLDERS.put(placeholder.placeholder(), placeholder);
         }
 
         public static void unregister(@Nonnull String placeholder) {
-            if (PLACEHOLDERS.containsKey(placeholder)) {
-                PLACEHOLDERS.remove(placeholder);
-            } else Logger.error.println("A static placeholder named <'" + placeholder + "'> is not registered");
-        }
-
-        public static void updateValue(@Nonnull Placeholder placeholder) {
-            if (PLACEHOLDERS.containsKey(placeholder.placeholder())) {
-                PLACEHOLDERS.put(placeholder.placeholder(), placeholder.object().toString());
-            } else Logger.error.println("A static placeholder named <'" + placeholder + "'> is not registered");
+            PLACEHOLDERS.remove(placeholder);
         }
 
         @Nullable
         public static Placeholder valueOf(@Nonnull String placeholder) {
-            if (isRegistered(placeholder)) return new Placeholder(placeholder, PLACEHOLDERS.get(placeholder));
-            else return null;
+            return PLACEHOLDERS.get(placeholder);
         }
 
         static {
             register(new Placeholder("nl", "\n"));
-
-            register(new VoidFormulary() {
-                @Nonnull
-                @Override
-                public Placeholder check(@Nullable Void value) {
-                    return new Placeholder("prefix", SystemMessageKey.PREFIX.message());
-                }
-            });
-            register(new VoidFormulary() {
-                @Nonnull
-                @Override
-                public Placeholder check(@Nullable Void value) {
-                    return new Placeholder("time", new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()));
-                }
-            });
-            register(new VoidFormulary() {
-                @Nonnull
-                @Override
-                public Placeholder check(@Nullable Void value) {
-                    return new Placeholder("thread", Thread.currentThread().getName());
-                }
-            });
-
-            register(new PlayerFormulary() {
-                @Nonnull
-                @Override
-                public Placeholder check(@Nonnull PlatformPlayer player) {
-                    return new Placeholder("player", player.getName());
-                }
-            });
+            register(new Placeholder("prefix", SystemMessageKey.PREFIX.message()));
+            register(new Placeholder("time", () -> new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime())));
+            register(new Placeholder("thread", Thread.currentThread().getName()));
+            register(new Placeholder("player", PlatformPlayer::getName));
         }
-
-        public static <V> void register(@Nonnull Formulary<V> formulary) {
-            if (!FORMULARY.contains(formulary)) FORMULARY.add(formulary);
-            else Logger.error.println("This dynamic placeholder is already registered");
-        }
-
-        public static void unregister(@Nonnull Formulary<?> formulary) {
-            if (FORMULARY.contains(formulary)) FORMULARY.remove(formulary);
-            else Logger.error.println("This dynamic placeholder is not registered");
-        }
-    }
-
-    public Placeholder(@Nonnull String placeholder, @Nullable Object object) {
-        this.placeholder = placeholder;
-        this.object = (object == null ? "§8-§7/§8-§r" : object);
     }
 
     @Nonnull
     public String replace(@Nonnull Object value) {
-        return value.toString().replace("%" + placeholder() + "%", object().toString());
+        return value.toString().replace("%" + placeholder() + "%", value());
     }
 
     @Nonnull
     public static String replace(@Nonnull Object value, @Nonnull Placeholder... placeholders) {
         String string = value.toString();
-        for (Placeholder placeholder : placeholders) {
-            string = placeholder.replace(string);
-        }
+        for (Placeholder placeholder : placeholders) string = placeholder.replace(string);
         return string;
     }
 }

@@ -11,9 +11,6 @@ import net.nonswag.tnl.core.api.language.Language;
 import net.nonswag.tnl.core.api.logger.Color.Hex;
 import net.nonswag.tnl.core.api.logger.Logger;
 import net.nonswag.tnl.core.api.message.Placeholder.Registry;
-import net.nonswag.tnl.core.api.message.formulary.Formulary;
-import net.nonswag.tnl.core.api.message.formulary.PlayerFormulary;
-import net.nonswag.tnl.core.api.message.formulary.VoidFormulary;
 import net.nonswag.tnl.core.api.message.key.Key;
 import net.nonswag.tnl.core.api.message.key.MessageKey;
 import net.nonswag.tnl.core.api.message.key.SystemMessageKey;
@@ -23,6 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class Message {
@@ -70,21 +68,11 @@ public final class Message {
 
     @Nonnull
     public static String format(@Nonnull String text, @Nullable PlatformPlayer player, @Nonnull Placeholder... placeholders) {
-        for (Placeholder placeholder : placeholders) {
-            text = text.replace("%" + placeholder.placeholder() + "%", placeholder.object().toString());
-        }
-        for (String placeholder : Registry.values()) {
-            Placeholder check = Registry.valueOf(placeholder);
-            if (check != null) text = text.replace("%" + check.placeholder() + "%", check.object().toString());
-            else Logger.error.println("Cannot find placeholder <'" + placeholder + "'> but it is registered");
-        }
-        for (Formulary<?> form : Registry.formularies()) {
-            Placeholder check = null;
-            if (form instanceof PlayerFormulary) {
-                if (player != null) check = ((PlayerFormulary)form).check(player);
-            } else if (form instanceof VoidFormulary)check = ((VoidFormulary)form).check();
-            else Logger.error.println("Formulary Instance <'" + form.getClass().getName() + "'> is not registered");
-            if (check != null) text = text.replace("%" + check.placeholder() + "%", check.object().toString());
+        List<Placeholder> list = Registry.placeholders();
+        list.addAll(Arrays.asList(placeholders));
+        for (Placeholder p : list) {
+            if (!text.contains("%" + p.placeholder() + "%")) continue;
+            text = text.replace("%" + p.placeholder() + "%", player == null ? p.value() : p.value(player));
         }
         return Hex.colorize(text);
     }
