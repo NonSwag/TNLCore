@@ -3,6 +3,7 @@ package net.nonswag.tnl.core.utils;
 import net.nonswag.tnl.core.api.math.MathUtil;
 
 import javax.annotation.Nonnull;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 
 public final class StringUtil {
@@ -27,5 +28,12 @@ public final class StringUtil {
     @Nonnull
     public static String format(@Nonnull String pattern, double number) {
         return new DecimalFormat(pattern).format(number);
+    }
+
+    @Nonnull
+    public static byte[][] toByteArray(@Nonnull String... strings) {
+        byte[][] bytes = new byte[strings.length][];
+        for (int i = 0; i < strings.length; i++) bytes[i] = strings[i].getBytes(StandardCharsets.UTF_8);
+        return bytes;
     }
 }

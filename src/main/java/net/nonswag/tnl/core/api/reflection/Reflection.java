@@ -7,6 +7,7 @@ import net.nonswag.tnl.core.api.object.Objects;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -288,5 +289,10 @@ public final class Reflection {
             if (Modifier.isStatic(field.getModifiers())) fields.add(field.getName());
         }
         return fields;
+    }
+
+    @Nonnull
+    public static <A extends Annotation> Objects<A> getAnnotation(@Nonnull Class<A> clazz) {
+        return new Objects<>(clazz.getAnnotation(clazz));
     }
 }
