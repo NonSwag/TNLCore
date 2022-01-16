@@ -88,7 +88,11 @@ public class Placeholder {
             register(new Placeholder("nl", "\n"));
             register(new Placeholder("prefix", SystemMessageKey.PREFIX.message()));
             register(new Placeholder("time", () -> new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime())));
-            register(new Placeholder("thread", Thread.currentThread().getName()));
+            register(new Placeholder("thread", () -> {
+                String name = Thread.currentThread().getName();
+                if (name.length() > 20) return name.substring(0, 20) + "...";
+                else return name;
+            }));
             register(new Placeholder("player", PlatformPlayer::getName));
         }
     }
