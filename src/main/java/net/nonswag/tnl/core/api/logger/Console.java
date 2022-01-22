@@ -7,14 +7,13 @@ import net.nonswag.tnl.core.api.message.key.Key;
 import net.nonswag.tnl.core.api.platform.PlatformPlayer;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class Console implements CommandSource {
 
     @Nonnull
     private static final Console instance = new Console();
 
-    private Console() {
+    protected Console() {
     }
 
     @Override
@@ -35,16 +34,6 @@ public class Console implements CommandSource {
     @Override
     public boolean hasPermission(@Nonnull String permissions) {
         return true;
-    }
-
-    @Override
-    public boolean isConsole() {
-        return true;
-    }
-
-    @Override
-    public boolean equals(@Nullable Object object) {
-        return object instanceof Console;
     }
 
     @Nonnull

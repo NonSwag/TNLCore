@@ -8,9 +8,4 @@ public interface PlatformPlayer extends CommandSource {
 
     @Nonnull
     String getName();
-
-    @Override
-    default boolean isPlayer() {
-        return true;
-    }
 }

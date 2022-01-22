@@ -18,11 +18,11 @@ public interface CommandSource {
     boolean hasPermission(@Nonnull String permissions);
 
     default boolean isConsole() {
-        return false;
+        return this instanceof Console;
     }
 
     default boolean isPlayer() {
-        return false;
+        return this instanceof PlatformPlayer;
     }
 
     @Nonnull
