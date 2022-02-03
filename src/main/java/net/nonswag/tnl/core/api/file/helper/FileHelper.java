@@ -62,7 +62,7 @@ public final class FileHelper {
     public static void copyResourceFile(@Nonnull Class<?> clazz, @Nonnull String resource, @Nonnull String destination, boolean override) {
         File to = new File(destination).getAbsoluteFile();
         FileHelper.createSilent(to);
-        File file = new File(to, resource);
+        File file = new File(to, new File(resource).getName());
         if (override || !file.exists()) {
             InputStream from = clazz.getClassLoader().getResourceAsStream(resource);
             if (from != null) {

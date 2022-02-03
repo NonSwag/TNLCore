@@ -9,7 +9,6 @@ import net.nonswag.tnl.core.utils.LinuxUtil;
 
 import javax.annotation.Nonnull;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -57,7 +56,7 @@ public class TextFile extends Loadable implements Saveable, Deletable {
     @Override
     protected TextFile load() {
         FileHelper.createSilent(this.getFile());
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(this.getFile()), StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(this.getFile()), getCharset()))) {
             Object[] array = reader.lines().toArray();
             setContent(new String[array.length]);
             for (int i = 0; i < array.length; i++) getContent()[i] = (String) array[i];
@@ -75,7 +74,7 @@ public class TextFile extends Loadable implements Saveable, Deletable {
 
     @Override
     public void save() {
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(getFile()), StandardCharsets.UTF_8))) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(getFile()), getCharset()))) {
             Stream<String> stream = Arrays.stream(getContent());
             if (this.isSort()) stream = stream.sorted();
             stream.forEach((s) -> {

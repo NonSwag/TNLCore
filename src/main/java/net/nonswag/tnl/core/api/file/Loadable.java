@@ -2,6 +2,8 @@ package net.nonswag.tnl.core.api.file;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public abstract class Loadable {
 
@@ -22,6 +24,11 @@ public abstract class Loadable {
 
     @Nonnull
     protected abstract Loadable load();
+
+    @Nonnull
+    public Charset getCharset() {
+        return StandardCharsets.UTF_8;
+    }
 
     @Nonnull
     public final File getFile() {

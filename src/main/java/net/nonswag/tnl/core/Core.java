@@ -11,9 +11,9 @@ public class Core {
     }
 
     public static void main(@Nonnull String[] args) {
-        FileHelper.copyResourceFile(Core.class, "system.locale", "Core/Messages/", false);
-        FileHelper.copyResourceFile(Core.class, "american-english.locale", "Core/Messages/", false);
-        FileHelper.copyResourceFile(Core.class, "german.locale", "Core/Messages/", false);
+        FileHelper.copyResourceFile(Core.class, "messages/system.locale", "Core/Messages/", false);
+        FileHelper.copyResourceFile(Core.class, "messages/american-english.locale", "Core/Messages/", false);
+        FileHelper.copyResourceFile(Core.class, "messages/german.locale", "Core/Messages/", false);
         Message.init();
     }
 

@@ -1,6 +1,9 @@
 package net.nonswag.tnl.core.api.file.formats;
 
-import com.google.gson.*;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
 import net.nonswag.tnl.core.api.file.Deletable;
 import net.nonswag.tnl.core.api.file.Loadable;
 import net.nonswag.tnl.core.api.file.Saveable;
@@ -11,7 +14,6 @@ import net.nonswag.tnl.core.utils.LinuxUtil;
 
 import javax.annotation.Nonnull;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class JsonFile extends Loadable implements Saveable, Deletable {
@@ -47,7 +49,7 @@ public class JsonFile extends Loadable implements Saveable, Deletable {
     @Override
     protected final JsonFile load() {
         FileHelper.createSilent(getFile());
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), getCharset()))) {
             jsonElement = JsonHelper.parse(reader);
             if (jsonElement instanceof JsonNull) this.jsonElement = new JsonObject();
             save();
@@ -62,7 +64,7 @@ public class JsonFile extends Loadable implements Saveable, Deletable {
 
     @Override
     public final void save() {
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(getFile()), StandardCharsets.UTF_8))) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(getFile()), getCharset()))) {
             writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(getJsonElement()));
         } catch (Exception e) {
             Logger.error.println("Failed to save file <'" + getFile().getAbsolutePath() + "'>", e.getMessage());

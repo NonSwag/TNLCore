@@ -11,7 +11,6 @@ import net.nonswag.tnl.core.utils.LinuxUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class PropertyFile extends Loadable implements Saveable, Deletable {
@@ -45,6 +44,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
     public final void setComments(@Nonnull List<String> comments) {
         this.comments = comments;
     }
+
     public final void addComment(@Nonnull String comment) {
         getComments().add(comment);
     }
@@ -80,7 +80,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
     @Override
     protected final PropertyFile load() {
         FileHelper.createSilent(getFile());
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), getCharset()))) {
             getValues().clear();
             reader.lines().forEach(s -> {
                 if (s.startsWith("#")) this.getComments().add(s.substring(1));
@@ -103,7 +103,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
 
     @Override
     public final void save() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(getFile()))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(getFile(), getCharset()))) {
             getComments().forEach((comment) -> {
                 try {
                     writer.write("#" + comment.replace("\n", "\\n") + "\n");

@@ -89,10 +89,10 @@ public final class Message {
     }
 
     public static void init() {
-        File[] files = new File("Core/Messages/").listFiles();
+        File[] files = new File("Core/Messages/").listFiles((file, s) -> s.endsWith(".locale"));
         List<Language> languages = new ArrayList<>();
         for (File file : files == null ? new File[0] : files) {
-            if (file.getName().endsWith(".locale") && Message.class.getClassLoader().getResource(file.getName()) == null) {
+            if (Message.class.getClassLoader().getResource("messages/" + file.getName()) == null) {
                 String name = null;
                 String shorthand = null;
                 PropertyFile propertyFile = new PropertyFile(file);

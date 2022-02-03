@@ -9,7 +9,6 @@ import net.nonswag.tnl.core.utils.LinuxUtil;
 
 import javax.annotation.Nonnull;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -68,7 +67,7 @@ public abstract class SeparatorFile extends Loadable implements Saveable, Deleta
     @Override
     protected final SeparatorFile load() {
         FileHelper.createSilent(this.getFile());
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(this.getFile()), StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(this.getFile()), getCharset()))) {
             getEntries().clear();
             reader.lines().forEach(s -> {
                 if (!s.isEmpty()) getEntries().add(Arrays.asList(s.split(getDelimiter())));
@@ -87,7 +86,7 @@ public abstract class SeparatorFile extends Loadable implements Saveable, Deleta
 
     @Override
     public final void save() {
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(this.getFile()), StandardCharsets.UTF_8))) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(this.getFile()), getCharset()))) {
             for (List<String> entry : getEntries()) writer.write(String.join(getDelimiter(), entry) + "\n");
         } catch (Exception var6) {
             Logger.error.println("Failed to save file <'" + this.getFile().getAbsolutePath() + "'>", var6);

@@ -5,6 +5,8 @@ import net.nonswag.tnl.core.api.message.key.Key;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 public class MessageFile extends PropertyFile {
@@ -87,5 +89,11 @@ public class MessageFile extends PropertyFile {
 
     public static boolean isRegistered(@Nonnull Language language) {
         return getList().containsKey(language);
+    }
+
+    @Nonnull
+    @Override
+    public Charset getCharset() {
+        return StandardCharsets.ISO_8859_1;
     }
 }
