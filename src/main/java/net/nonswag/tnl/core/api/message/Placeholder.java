@@ -59,7 +59,7 @@ public class Placeholder {
         private static final HashMap<String, Placeholder> PLACEHOLDERS = new HashMap<>();
 
         @Nonnull
-        static List<Placeholder> placeholders() {
+        public static List<Placeholder> placeholders() {
             return new ArrayList<>(PLACEHOLDERS.values());
         }
 
@@ -100,12 +100,5 @@ public class Placeholder {
     @Nonnull
     public String replace(@Nonnull Object value) {
         return value.toString().replace("%" + placeholder() + "%", value());
-    }
-
-    @Nonnull
-    public static String replace(@Nonnull Object value, @Nonnull Placeholder... placeholders) {
-        String string = value.toString();
-        for (Placeholder placeholder : placeholders) string = placeholder.replace(string);
-        return string;
     }
 }
