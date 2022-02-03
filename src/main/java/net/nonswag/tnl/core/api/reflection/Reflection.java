@@ -72,8 +72,10 @@ public final class Reflection {
             field.setAccessible(true);
             field.set(clazz, value);
             field.setAccessible(false);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
+        } catch (IllegalAccessException e) {
             Logger.error.println(e.getMessage());
+        } catch (NoSuchFieldException e) {
+            Logger.error.println("The field <" + name + ":" + clazz.getClass().getName() + "> does not exist");
         }
     }
 
@@ -83,8 +85,10 @@ public final class Reflection {
             field.setAccessible(true);
             field.set(clazz, value);
             field.setAccessible(false);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
+        } catch (IllegalAccessException e) {
             Logger.error.println(e.getMessage());
+        } catch (NoSuchFieldException e) {
+            Logger.error.println("The field <" + name + ":" + clazz.getClass().getName() + "> does not exist");
         }
     }
 
@@ -98,8 +102,10 @@ public final class Reflection {
             field.set(null, value);
             modifiers.setAccessible(false);
             field.setAccessible(false);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
+        } catch (IllegalAccessException e) {
             Logger.error.println(e.getMessage());
+        } catch (NoSuchFieldException e) {
+            Logger.error.println("The static field <" + name + ":" + clazz.getName() + "> does not exist");
         }
     }
 
@@ -110,7 +116,7 @@ public final class Reflection {
             declaredMethod.setAccessible(true);
             return new Objects<>(declaredMethod);
         } catch (NoSuchMethodException e) {
-            Logger.error.println(e);
+            Logger.error.println("The method <" + method + ":" + clazz.getClass().getName() + "> does not exist");
             return new Objects<>();
         }
     }
@@ -122,7 +128,7 @@ public final class Reflection {
             declaredMethod.setAccessible(true);
             return new Objects<>(declaredMethod);
         } catch (NoSuchMethodException e) {
-            Logger.error.println(e);
+            Logger.error.println("The static method <" + method + ":" + clazz.getName() + "> does not exist");
             return new Objects<>();
         }
     }
@@ -144,7 +150,7 @@ public final class Reflection {
             declaredField.setAccessible(true);
             return new Objects<>((P) declaredField.get(object));
         } catch (NoSuchFieldException e) {
-            Logger.debug.println("The field <" + field + "> does not exist");
+            Logger.error.println("The field <" + field + ":" + superclass.getName() + "> does not exist");
         } catch (Exception ignored) {
         }
         return new Objects<>();
