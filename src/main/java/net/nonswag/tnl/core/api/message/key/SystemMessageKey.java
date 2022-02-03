@@ -22,6 +22,8 @@ public final class SystemMessageKey extends Key {
     @Nonnull
     public static final SystemMessageKey LOG_DEBUG = new SystemMessageKey("log-debug").register();
     @Nonnull
+    public static final SystemMessageKey LOG_TIP = new SystemMessageKey("log-tip").register();
+    @Nonnull
     public static final SystemMessageKey CHAT_FORMAT = new SystemMessageKey("chat-format").register();
     @Nonnull
     public static final SystemMessageKey CHAT_MENTION = new SystemMessageKey("chat-mention").register();

@@ -1,7 +1,8 @@
-prefix=ยง8[ยงfยงlTNLยง8]ยงr
-log-info=ยง8[ยง1%time% ยง8|ยง1 Info ยง8| ยง1%thread%ยง8]
-log-warn=ยง8[ยงe%time% ยง8|ยงe Warning ยง8| ยงe%thread%ยง8]
-log-error=ยง8[ยง4%time% ยง8|ยง4 Error ยง8| ยง4%thread%ยง8]
-log-debug=ยง8[ยง6%time% ยง8|ยง6 Debug ยง8| ยง6%thread%ยง8]
-chat-format=ยง8[%color%%world%ยง8] ยงf%display_name% ยง8ยป %color%%message%
-chat-mention=ยง8(ยง3%player%ยง8) %color%
+prefix=ง8[งfงlTNLง8]งr
+log-info=ง8[ง1%time% ง8|ง1 Info ง8| ง1%thread%ง8]
+log-warn=ง8[งe%time% ง8|งe Warning ง8| งe%thread%ง8]
+log-error=ง8[ง4%time% ง8|ง4 Error ง8| ง4%thread%ง8]
+log-debug=ง8[ง6%time% ง8|ง6 Debug ง8| ง6%thread%ง8]
+log-tip=ง8[งf%time% ง8|งf Tip ง8| งf%thread%ง8]
+chat-format=ง8[%color%%world%ง8] งf%display_name% ง8ป %color%%message%
+chat-mention=ง8(ง3%player%ง8) %color%

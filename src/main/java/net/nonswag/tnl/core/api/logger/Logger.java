@@ -24,6 +24,8 @@ public class Logger extends PrintStream implements Duplicable {
     @Nonnull
     public static final Logger debug = new Logger("debug", SystemMessageKey.LOG_DEBUG::message, FileDescriptor.out).colorize(Color.YELLOW, Color.GOLD);
     @Nonnull
+    public static final Logger tip = new Logger("tip", SystemMessageKey.LOG_TIP::message, FileDescriptor.out).colorize(Color.WHITE, Color.LIME);
+    @Nonnull
     public static final Logger error = new Logger("error", SystemMessageKey.LOG_ERROR::message, FileDescriptor.err).colorize(Color.RED, Color.DARK_RED);
 
     @Nonnull
