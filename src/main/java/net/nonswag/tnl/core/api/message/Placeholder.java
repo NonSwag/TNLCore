@@ -45,12 +45,20 @@ public class Placeholder {
 
     @Nonnull
     public String value() {
-        return object == null ? "null" : object.getAsString();
+        try {
+            return object == null ? "null" : object.getAsString();
+        } catch (Throwable t) {
+            return "null";
+        }
     }
 
     @Nonnull
     public String value(@Nonnull PlatformPlayer player) {
-        return mutualObject == null ? value() : mutualObject.getAsString(player);
+        try {
+            return mutualObject == null ? value() : mutualObject.getAsString(player);
+        } catch (Throwable t) {
+            return "null";
+        }
     }
 
     public static class Registry {
