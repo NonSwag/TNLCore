@@ -86,9 +86,7 @@ public class SQLConnection implements AutoCloseable, Duplicable {
     public ResultSet executeQuery(@Nonnull String query, @Nonnull Object... parameters) throws SQLException {
         if (reconnect()) {
             try (PreparedStatement statement = getConnection().prepareStatement(query)) {
-                for (int i = 0; i < parameters.length; i++) {
-                    statement.setObject(i + 1, parameters[(parameters.length - 1) - i]);
-                }
+                for (int i = 0; i < parameters.length; i++) statement.setObject(i + 1, parameters[i]);
                 CachedRowSet resultCached = RowSetProvider.newFactory().createCachedRowSet();
                 resultCached.populate(statement.executeQuery());
                 return resultCached;
@@ -104,9 +102,7 @@ public class SQLConnection implements AutoCloseable, Duplicable {
         try {
             if (reconnect()) {
                 PreparedStatement statement = getConnection().prepareStatement(query);
-                for (int i = 0; i < parameters.length; i++) {
-                    statement.setObject(i + 1, parameters[(parameters.length - 1) - i]);
-                }
+                for (int i = 0; i < parameters.length; i++) statement.setObject(i + 1, parameters[i]);
                 statement.executeUpdate();
             } else Logger.error.println("failed to execute update: cannot reconnect");
         } catch (SQLException e) {
