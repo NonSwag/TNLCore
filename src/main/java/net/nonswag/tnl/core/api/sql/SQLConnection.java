@@ -1,16 +1,13 @@
 package net.nonswag.tnl.core.api.sql;
 
-import net.nonswag.tnl.core.api.errors.TNLRuntimeException;
 import net.nonswag.tnl.core.api.logger.Logger;
 import net.nonswag.tnl.core.api.object.Duplicable;
-import net.nonswag.tnl.core.api.object.Pair;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetProvider;
+import java.sql.*;
 
 public class SQLConnection implements AutoCloseable, Duplicable {
 
@@ -40,14 +37,6 @@ public class SQLConnection implements AutoCloseable, Duplicable {
         } catch (ClassNotFoundException e) {
             Logger.error.println("Driver not found <'" + driver + "'>");
             throw new SQLException("Cannot load driver", e);
-        }
-    }
-
-    public void disconnect() {
-        try {
-            getConnection().close();
-        } catch (SQLException e) {
-            Logger.error.println(e);
         }
     }
 
@@ -93,38 +82,36 @@ public class SQLConnection implements AutoCloseable, Duplicable {
         }
     }
 
-    public final void createTable(@Nonnull String name, @Nonnull Parameter... parameters) {
-        if (parameters.length == 0) throw new TNLRuntimeException("A table must have at least one row");
-        else {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < parameters.length; i++) {
-                Pair<String, String> parameter = parameters[i];
-                builder.append("`").append(parameter.getKey()).append("` ").append(parameter.getValue());
-                if (i + 1 < parameters.length) builder.append(", ");
-            }
-            executeUpdate("CREATE TABLE IF NOT EXISTS `" + getDatabase() + "`.`" + name + "` (" + builder + ")");
-        }
-    }
-
     @Nullable
-    public ResultSet executeQuery(@Nonnull String command) {
-        try {
-            if (reconnect()) {
-                ResultSet result = getConnection().prepareStatement(command).executeQuery();
-                if (result.next()) return result;
-            } else Logger.error.println("failed to execute update: cannot reconnect");
-        } catch (SQLException e) {
-            if (!reconnect()) Logger.error.println(e);
-        }
+    public ResultSet executeQuery(@Nonnull String query, @Nonnull Object... parameters) throws SQLException {
+        if (reconnect()) {
+            try (PreparedStatement statement = getConnection().prepareStatement(query)) {
+                for (int i = 0; i < parameters.length; i++) {
+                    statement.setObject(i + 1, parameters[(parameters.length - 1) - i]);
+                }
+                CachedRowSet resultCached = RowSetProvider.newFactory().createCachedRowSet();
+                resultCached.populate(statement.executeQuery());
+                return resultCached;
+            } catch (SQLException e) {
+                if (!reconnect()) Logger.error.println("failed to reconnect to database", e);
+                else throw e;
+            }
+        } else Logger.error.println("failed to execute query: cannot reconnect");
         return null;
     }
 
-    public void executeUpdate(@Nonnull String command) {
+    public void executeUpdate(@Nonnull String query, @Nonnull Object... parameters) throws SQLException {
         try {
-            if (reconnect()) getConnection().prepareStatement(command).executeUpdate();
-            else Logger.error.println("failed to execute update: cannot reconnect");
+            if (reconnect()) {
+                PreparedStatement statement = getConnection().prepareStatement(query);
+                for (int i = 0; i < parameters.length; i++) {
+                    statement.setObject(i + 1, parameters[(parameters.length - 1) - i]);
+                }
+                statement.executeUpdate();
+            } else Logger.error.println("failed to execute update: cannot reconnect");
         } catch (SQLException e) {
-            if (!reconnect()) Logger.error.println(e);
+            if (!reconnect()) Logger.error.println("failed to reconnect to database", e);
+            else throw e;
         }
     }
 
@@ -133,7 +120,7 @@ public class SQLConnection implements AutoCloseable, Duplicable {
             try {
                 setConnection(newConnection());
             } catch (SQLException e) {
-                Logger.error.println(e);
+                Logger.error.println("failed to reconnect to database", e);
                 return false;
             }
         }
@@ -147,7 +134,11 @@ public class SQLConnection implements AutoCloseable, Duplicable {
 
     @Override
     public void close() {
-        disconnect();
+        try {
+            getConnection().close();
+        } catch (SQLException e) {
+            Logger.error.println(e);
+        }
     }
 
     @Nonnull
