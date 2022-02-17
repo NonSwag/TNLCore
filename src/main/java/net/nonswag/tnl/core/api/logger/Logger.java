@@ -101,7 +101,7 @@ public class Logger extends PrintStream implements Duplicable {
         return setMainColor(mainColor).setSecondaryColor(secondaryColor);
     }
 
-    private void printStackTrace(@Nonnull Throwable throwable) {
+    private synchronized void printStackTrace(@Nonnull Throwable throwable) {
         List<StackTraceElement> trace = Arrays.asList(throwable.getStackTrace());
         for (Throwable t : throwable.getSuppressed()) {
             for (StackTraceElement element : t.getStackTrace()) trace.removeIf(element::equals);
@@ -111,7 +111,7 @@ public class Logger extends PrintStream implements Duplicable {
         if (cause != null) printCause(cause);
     }
 
-    private void printCause(@Nonnull Throwable cause) {
+    private synchronized void printCause(@Nonnull Throwable cause) {
         println("Caused by: " + cause);
         StackTraceElement[] trace = cause.getStackTrace();
         for (StackTraceElement element : trace) println("\tat " + element);
@@ -182,7 +182,7 @@ public class Logger extends PrintStream implements Duplicable {
         return this;
     }
 
-    private void _println(@Nonnull Object... values) {
+    private synchronized void _println(@Nonnull Object... values) {
         if (!getCondition().check()) return;
         for (@Nullable Object value : values) {
             if (value == null) continue;
