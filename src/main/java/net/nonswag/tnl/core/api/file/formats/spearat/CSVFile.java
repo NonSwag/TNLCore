@@ -7,17 +7,14 @@ public class CSVFile extends SeparatorFile {
 
     public CSVFile(@Nonnull String file) {
         super(file);
-        load();
     }
 
     public CSVFile(@Nonnull String path, @Nonnull String file) {
         super(path, file);
-        load();
     }
 
     public CSVFile(@Nonnull File file) {
         super(file);
-        load();
     }
 
     @Nonnull

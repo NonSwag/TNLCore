@@ -20,14 +20,17 @@ public abstract class SeparatorFile extends Loadable implements Saveable, Deleta
 
     protected SeparatorFile(@Nonnull String file) {
         super(file);
+        load();
     }
 
     protected SeparatorFile(@Nonnull String path, @Nonnull String file) {
         super(path, file);
+        load();
     }
 
     protected SeparatorFile(@Nonnull File file) {
         super(file);
+        load();
     }
 
     @Nonnull
@@ -88,8 +91,8 @@ public abstract class SeparatorFile extends Loadable implements Saveable, Deleta
     public final void save() {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(this.getFile()), getCharset()))) {
             for (List<String> entry : getEntries()) writer.write(String.join(getDelimiter(), entry) + "\n");
-        } catch (Exception var6) {
-            Logger.error.println("Failed to save file <'" + this.getFile().getAbsolutePath() + "'>", var6);
+        } catch (Exception e) {
+            Logger.error.println("Failed to save file <'" + this.getFile().getAbsolutePath() + "'>", e);
         }
     }
 

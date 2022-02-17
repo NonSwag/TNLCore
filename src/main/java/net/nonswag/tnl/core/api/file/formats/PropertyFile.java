@@ -87,7 +87,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
                 else {
                     List<String> split = Arrays.asList(s.split(this.getDelimeter()));
                     if (split.size() >= 1 && !split.get(0).isEmpty()) {
-                        getValues().put(split.get(0).toLowerCase(), String.join(getDelimeter(), split.subList(1, split.size())));
+                        getValues().put(split.get(0), String.join(getDelimeter(), split.subList(1, split.size())));
                     }
                 }
             });
@@ -129,53 +129,62 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
     }
 
     public void setValueIfAbsent(@Nonnull String key, @Nonnull String value) {
-        getValues().putIfAbsent(key.toLowerCase(), value);
+        if (!has(key)) setValue(key, value);
+    }
+
+    public void setValueIfAbsent(@Nonnull String key, @Nonnull Collection<String> value) {
+        setValueIfAbsent(key, String.join(", ", value));
     }
 
     public void setValueIfAbsent(@Nonnull String key, @Nonnull Boolean value) {
-        getValues().putIfAbsent(key.toLowerCase(), String.valueOf(value));
+        setValueIfAbsent(key, value.toString());
     }
 
     public void setValueIfAbsent(@Nonnull String key, @Nonnull Number value) {
-        getValues().putIfAbsent(key.toLowerCase(), String.valueOf(value));
+        setValueIfAbsent(key, value.toString());
     }
 
     public void setValueIfAbsent(@Nonnull String key, @Nonnull Character value) {
-        getValues().putIfAbsent(key.toLowerCase(), String.valueOf(value));
+        setValueIfAbsent(key, value.toString());
     }
 
     public void setValue(@Nonnull String key, @Nonnull String value) {
-        getValues().put(key.toLowerCase(), value);
+        getValues().put(key, value);
     }
 
     public void setValue(@Nonnull String key, @Nonnull Collection<String> value) {
-        getValues().put(key.toLowerCase(), String.join(", ", value));
+        getValues().put(key, String.join(", ", value));
     }
 
     public void setValue(@Nonnull String key, @Nonnull Boolean value) {
-        getValues().put(key.toLowerCase(), String.valueOf(value));
+        getValues().put(key, String.valueOf(value));
     }
 
     public void setValue(@Nonnull String key, @Nonnull Number value) {
-        getValues().put(key.toLowerCase(), String.valueOf(value));
+        getValues().put(key, String.valueOf(value));
     }
 
     public void setValue(@Nonnull String key, @Nonnull Character value) {
-        getValues().put(key.toLowerCase(), String.valueOf(value));
+        getValues().put(key, String.valueOf(value));
     }
 
     public boolean has(@Nonnull String key) {
-        return getValues().containsKey(key.toLowerCase());
+        return getValues().containsKey(key);
     }
 
     @Nonnull
     public String getOrDefault(@Nonnull String key, @Nonnull String defaultValue) {
-        return getValues().getOrDefault(key.toLowerCase(), defaultValue);
+        return getValues().getOrDefault(key, defaultValue);
     }
 
     @Nullable
     public String getString(@Nonnull String key) {
-        return getValues().get(key.toLowerCase());
+        return getValues().get(key);
+    }
+
+    @Nonnull
+    public Objects<String> get(@Nonnull String key) {
+        return new Objects<>(getString(key));
     }
 
     @Nonnull
@@ -183,7 +192,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
         try {
             String string = getString(key);
             if (string != null && !string.isEmpty()) {
-                return Arrays.asList(new Objects<>(getString(key.toLowerCase())).nonnull().split(", "));
+                return Arrays.asList(get(key).nonnull().split(", "));
             }
         } catch (Exception ignored) {
         }
@@ -192,7 +201,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
 
     public int getInteger(@Nonnull String key) {
         try {
-            return Integer.parseInt(new Objects<>(getString(key.toLowerCase())).nonnull());
+            return Integer.parseInt(get(key).nonnull());
         } catch (Exception ignored) {
             return 0;
         }
@@ -200,7 +209,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
 
     public double getDouble(@Nonnull String key) {
         try {
-            return Double.parseDouble(new Objects<>(getString(key.toLowerCase())).nonnull());
+            return Double.parseDouble(get(key).nonnull());
         } catch (Exception e) {
             return 0D;
         }
@@ -208,7 +217,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
 
     public float getFloat(@Nonnull String key) {
         try {
-            return Float.parseFloat(new Objects<>(getString(key.toLowerCase())).nonnull());
+            return Float.parseFloat(get(key).nonnull());
         } catch (Exception e) {
             return 0F;
         }
@@ -216,7 +225,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
 
     public short getShort(@Nonnull String key) {
         try {
-            return Short.parseShort(new Objects<>(getString(key.toLowerCase())).nonnull());
+            return Short.parseShort(get(key).nonnull());
         } catch (Exception e) {
             return 0;
         }
@@ -224,7 +233,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
 
     public byte getByte(@Nonnull String key) {
         try {
-            return Byte.parseByte(new Objects<>(getString(key.toLowerCase())).nonnull());
+            return Byte.parseByte(get(key).nonnull());
         } catch (Exception e) {
             return 0;
         }
@@ -232,7 +241,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
 
     public long getLong(@Nonnull String key) {
         try {
-            return Long.parseLong(new Objects<>(getString(key.toLowerCase())).nonnull());
+            return Long.parseLong(get(key).nonnull());
         } catch (Exception e) {
             return 0L;
         }
@@ -241,7 +250,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
     @Nullable
     public Character getCharacter(@Nonnull String key) {
         try {
-            return new Objects<>(getString(key.toLowerCase())).nonnull().charAt(0);
+            return get(key).nonnull().charAt(0);
         } catch (Exception e) {
             return null;
         }
@@ -250,7 +259,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
     @Nullable
     public char[] getCharacters(@Nonnull String key) {
         try {
-            return new Objects<>(getString(key.toLowerCase())).nonnull().toCharArray();
+            return get(key).nonnull().toCharArray();
         } catch (Exception e) {
             return null;
         }
@@ -258,14 +267,14 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
 
     public boolean getBoolean(@Nonnull String key) {
         try {
-            return Boolean.parseBoolean(new Objects<>(getString(key.toLowerCase())).nonnull());
+            return Boolean.parseBoolean(get(key).nonnull());
         } catch (Exception e) {
             return false;
         }
     }
 
     public void removeValue(@Nonnull String key) {
-        getValues().remove(key.toLowerCase());
+        getValues().remove(key);
     }
 
     @Nonnull

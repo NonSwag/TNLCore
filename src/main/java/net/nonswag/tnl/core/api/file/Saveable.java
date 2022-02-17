@@ -15,6 +15,6 @@ public interface Saveable {
     void save();
 
     default boolean isValid() {
-        return getFile().exists() && getFile().isFile();
+        return getFile().exists();
     }
 }

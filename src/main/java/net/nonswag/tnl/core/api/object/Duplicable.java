@@ -5,5 +5,5 @@ import javax.annotation.Nonnull;
 public interface Duplicable {
 
     @Nonnull
-    <C> C duplicate();
+    <C> C duplicate() throws Exception;
 }

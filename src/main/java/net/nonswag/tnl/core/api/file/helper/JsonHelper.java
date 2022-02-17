@@ -1,20 +1,26 @@
 package net.nonswag.tnl.core.api.file.helper;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.MalformedJsonException;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
-public class JsonHelper {
+public final class JsonHelper {
+
+    @Getter
+    @Setter
+    private static boolean lenient = true;
+
+    private JsonHelper() {
+    }
 
     @Nonnull
     public static JsonElement parse(@Nonnull String json) throws JsonSyntaxException {
@@ -22,7 +28,7 @@ public class JsonHelper {
     }
 
     @Nonnull
-    public static JsonElement parse(@Nonnull Reader reader) throws JsonIOException, JsonSyntaxException {
+    public static JsonElement parse(@Nonnull Reader reader) throws JsonParseException {
         try {
             JsonReader jsonReader = new JsonReader(reader);
             JsonElement element = parse(jsonReader);
@@ -37,15 +43,8 @@ public class JsonHelper {
     }
 
     @Nonnull
-    public static JsonElement parse(@Nonnull JsonReader reader) throws JsonIOException, JsonSyntaxException {
-        boolean lenient = reader.isLenient();
-        reader.setLenient(true);
-        try {
-            return Streams.parse(reader);
-        } catch (StackOverflowError | OutOfMemoryError e) {
-            throw new JsonParseException("Failed parsing JSON source: " + reader + " to Json", e);
-        } finally {
-            reader.setLenient(lenient);
-        }
+    public static JsonElement parse(@Nonnull JsonReader reader) throws JsonParseException {
+        reader.setLenient(isLenient());
+        return Streams.parse(reader);
     }
 }
