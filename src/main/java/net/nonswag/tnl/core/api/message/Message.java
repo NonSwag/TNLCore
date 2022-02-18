@@ -67,11 +67,11 @@ public final class Message {
 
     @Nonnull
     public static String format(@Nonnull String text, @Nullable PlatformPlayer player, @Nonnull Placeholder... placeholders) {
-        for (Placeholder p : placeholders) {
+        for (Placeholder p : Registry.placeholders()) {
             if (!text.contains("%" + p.placeholder() + "%")) continue;
             text = text.replace("%" + p.placeholder() + "%", player == null ? p.value() : p.value(player));
         }
-        for (Placeholder p : Registry.placeholders()) {
+        for (Placeholder p : placeholders) {
             if (!text.contains("%" + p.placeholder() + "%")) continue;
             text = text.replace("%" + p.placeholder() + "%", player == null ? p.value() : p.value(player));
         }

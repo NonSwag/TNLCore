@@ -66,8 +66,9 @@ public final class MessageKey extends Key {
     }
 
     @Nonnull
+    @Override
     public String message() {
-        return Message.get(this, Message.getEnglish());
+        return message(Language.AMERICAN_ENGLISH);
     }
 
     @Nonnull

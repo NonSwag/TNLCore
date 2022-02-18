@@ -43,6 +43,7 @@ public final class SystemMessageKey extends Key {
     }
 
     @Nonnull
+    @Override
     public String message() {
         return Message.get(this);
     }

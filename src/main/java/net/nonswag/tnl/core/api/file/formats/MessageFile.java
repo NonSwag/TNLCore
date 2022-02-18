@@ -1,5 +1,6 @@
 package net.nonswag.tnl.core.api.file.formats;
 
+import lombok.Getter;
 import net.nonswag.tnl.core.api.language.Language;
 import net.nonswag.tnl.core.api.message.key.Key;
 
@@ -9,10 +10,13 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
+@Getter
 public class MessageFile extends PropertyFile {
 
+    @Getter
     @Nonnull
     private static final HashMap<Language, MessageFile> list = new HashMap<>();
+
     @Nonnull
     private final Language language;
 
@@ -23,11 +27,6 @@ public class MessageFile extends PropertyFile {
 
     public MessageFile(@Nonnull String path, @Nonnull Language language) {
         this(path, language.name().toLowerCase().replace(" ", "-"), language);
-    }
-
-    @Nonnull
-    public final Language getLanguage() {
-        return this.language;
     }
 
     public final void setDefault(@Nonnull Key key, @Nonnull String message) {
@@ -75,11 +74,6 @@ public class MessageFile extends PropertyFile {
 
     public final void unregister() {
         getList().remove(this.getLanguage(), this);
-    }
-
-    @Nonnull
-    private static HashMap<Language, MessageFile> getList() {
-        return list;
     }
 
     @Nullable
