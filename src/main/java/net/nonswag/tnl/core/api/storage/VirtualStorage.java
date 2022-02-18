@@ -13,7 +13,7 @@ public class VirtualStorage {
     private final HashMap<String, Object> storage = new HashMap<>();
 
     @Nonnull
-    private HashMap<String, Object> getStorage() {
+    private synchronized HashMap<String, Object> getStorage() {
         return storage;
     }
 
