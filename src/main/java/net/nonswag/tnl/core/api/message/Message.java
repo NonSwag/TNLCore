@@ -67,7 +67,10 @@ public final class Message {
 
     @Nonnull
     public static String format(@Nonnull String text, @Nullable PlatformPlayer player, @Nonnull Placeholder... placeholders) {
+        List<String> override = new ArrayList<>();
+        for (Placeholder placeholder : placeholders) override.add(placeholder.placeholder());
         for (Placeholder p : Registry.placeholders()) {
+            if (override.contains(p.placeholder())) continue;
             if (!text.contains("%" + p.placeholder() + "%")) continue;
             text = text.replace("%" + p.placeholder() + "%", player == null ? p.value() : p.value(player));
         }
