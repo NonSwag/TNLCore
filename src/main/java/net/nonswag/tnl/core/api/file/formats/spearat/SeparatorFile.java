@@ -38,7 +38,7 @@ public abstract class SeparatorFile extends Loadable implements Saveable, Deleta
         return entries;
     }
 
-    private void setEntries(@Nonnull List<List<String>> entries) {
+    public final void setEntries(@Nonnull List<List<String>> entries) {
         this.entries = entries;
     }
 
