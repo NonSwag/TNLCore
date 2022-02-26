@@ -34,7 +34,15 @@ public final class FileHelper {
         try {
             create(file);
         } catch (IOException e) {
-            Logger.error.println("Failed to create the file <'" + file.getAbsolutePath() + "'>", e);
+            Logger.error.println("Failed to create file <'" + file.getAbsolutePath() + "'>", e);
+        }
+    }
+
+    public static void createLink(@Nonnull File from, @Nonnull File to) {
+        try {
+            if (!from.exists()) Files.createSymbolicLink(from.toPath(), to.toPath());
+        } catch (IOException e) {
+            Logger.error.println("Failed to create link between <'" + from.getAbsolutePath() + "'> and <'" + to.getAbsoluteFile() + "'>", e);
         }
     }
 
