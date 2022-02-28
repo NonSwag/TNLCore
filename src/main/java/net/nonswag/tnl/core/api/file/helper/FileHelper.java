@@ -40,6 +40,8 @@ public final class FileHelper {
 
     public static void createLink(@Nonnull File from, @Nonnull File to) {
         try {
+            from = from.getAbsoluteFile();
+            to = to.getAbsoluteFile();
             if (!from.exists()) Files.createSymbolicLink(from.toPath(), to.toPath());
         } catch (IOException e) {
             Logger.error.println("Failed to create link between <'" + from.getAbsolutePath() + "'> and <'" + to.getAbsoluteFile() + "'>", e);
