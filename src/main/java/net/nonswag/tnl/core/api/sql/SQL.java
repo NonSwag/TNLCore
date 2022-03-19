@@ -4,8 +4,13 @@ import net.nonswag.tnl.core.api.file.formats.PropertyFile;
 import net.nonswag.tnl.core.api.logger.Logger;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class SQL {
+
+    @Nonnull
+    private static final List<SQLConnection> connections = new ArrayList<>();
 
     private SQL() {
     }
@@ -23,6 +28,11 @@ public final class SQL {
         String driver = config.get("driver").nonnull();
         SQLConnection connection = new SQLConnection(url, username, password, driver);
         Logger.debug.println("Connected to database: " + url);
+        connections.add(connection);
         return connection;
+    }
+
+    public static void disconnect() {
+        for (SQLConnection connection : connections) connection.close();
     }
 }

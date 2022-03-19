@@ -37,7 +37,7 @@ public class SQLConnection implements AutoCloseable, Duplicable {
         config.setPassword(this.password = password);
         config.setDriverClassName(this.driver = driver);
         config.setJdbcUrl(this.url = url);
-        config.setConnectionTimeout(3000);
+        config.setConnectionTimeout(0);
         config.setMaxLifetime(30000);
         config.setMaximumPoolSize(5);
         this.dataSource = new HikariDataSource(config);
