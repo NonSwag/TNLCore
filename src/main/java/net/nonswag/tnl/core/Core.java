@@ -11,7 +11,7 @@ public class Core {
 
     @Getter
     @Nonnull
-    private static final File folder = new File("Core");
+    private static final File dataFolder = new File("Core");
 
     private Core() {
     }
