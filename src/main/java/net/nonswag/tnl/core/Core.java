@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 
 public class Core {
 
-    public Core() {
+    private Core() {
     }
 
     public static void main(@Nonnull String[] args) {
