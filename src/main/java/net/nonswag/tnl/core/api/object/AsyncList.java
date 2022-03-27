@@ -77,6 +77,7 @@ public class AsyncList<E> implements Iterable<E> {
     public class AsyncIterator implements Iterator<E> {
         private int index;
 
+        @Override
         public boolean hasNext() {
             return index < size;
         }
@@ -88,6 +89,7 @@ public class AsyncList<E> implements Iterable<E> {
             return (E) elements[index++];
         }
 
+        @Override
         public void remove() {
             AsyncList.this.remove(index);
         }
