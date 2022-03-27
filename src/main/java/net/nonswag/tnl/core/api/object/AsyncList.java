@@ -4,9 +4,7 @@ import lombok.Getter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.Objects;
 
 public class AsyncList<E> implements Iterable<E> {
@@ -97,12 +95,12 @@ public class AsyncList<E> implements Iterable<E> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < size; i++) {
             sb.append(elements[i]);
             if (i < size - 1) sb.append(", ");
         }
-        return sb.toString();
+        return sb.append("]").toString();
     }
 
     private void ensureCapacity() {
