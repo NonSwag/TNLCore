@@ -53,7 +53,7 @@ public class AsyncList<E> implements Iterable<E> {
     }
 
     public int indexOf(@Nullable E e) {
-        MultiThreadedIterator iterator = iterator();
+        AsyncIterator iterator = iterator();
         while (iterator.hasNext()) if (Objects.equals(iterator.next(), e)) return iterator.getIndex();
         return -1;
     }
@@ -71,12 +71,12 @@ public class AsyncList<E> implements Iterable<E> {
     }
 
     @Override
-    public MultiThreadedIterator iterator() {
-        return new MultiThreadedIterator();
+    public AsyncIterator iterator() {
+        return new AsyncIterator();
     }
 
     @Getter
-    public class MultiThreadedIterator implements Iterator<E> {
+    public class AsyncIterator implements Iterator<E> {
         private int index;
 
         public boolean hasNext() {
