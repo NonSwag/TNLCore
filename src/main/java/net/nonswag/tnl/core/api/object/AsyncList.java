@@ -52,7 +52,7 @@ public class AsyncList<E> implements Iterable<E> {
 
     public int indexOf(@Nullable E e) {
         AsyncIterator iterator = iterator();
-        while (iterator.hasNext()) if (Objects.equals(iterator.next(), e)) return iterator.getIndex();
+        while (iterator.hasNext()) if (Objects.equals(iterator.next(), e)) return iterator.getIndex() - 1;
         return -1;
     }
 
