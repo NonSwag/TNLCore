@@ -63,7 +63,12 @@ public enum Color {
     CYAN("\033[0;36m", "§3"),
     WHITE("\033[0;97m", "§f"),
 
-    HEX("", "§x");
+    BOLD_IGNORED("", "§l"),
+    UNDERLINE_IGNORED("", "§n"),
+    STRIKETHROUGH_IGNORED("", "§m"),
+    MATRIX_IGNORED("", "§k"),
+    ITALIC_IGNORED("", "§o"),
+    HEX_IGNORED("", "§x");
 
     @Nonnull
     private final String ansi;
@@ -94,12 +99,8 @@ public enum Color {
     public static String replace(@Nonnull String string) {
         if ((string.contains("<") && string.contains(">")) || string.contains("§")) {
             for (Color color : Color.values()) {
-                if (string.contains("<" + color.name().toLowerCase() + ">")) {
-                    string = string.replace("<" + color.name().toLowerCase() + ">", color.getAnsi());
-                }
-                if (string.contains(color.getCode())) {
-                    string = string.replace(color.getCode(), color.getAnsi());
-                }
+                string = string.replace("<" + color.name().toLowerCase() + ">", color.getAnsi());
+                string = string.replace(color.getCode(), color.getAnsi());
             }
         }
         return string;
@@ -118,8 +119,8 @@ public enum Color {
     public static final class Hex {
 
         @Nonnull
-        private static final Pattern PATTERN_1 = Pattern.compile("<color:#[a-fA-F0-9]{6}>");
-        private static final Pattern PATTERN_2 = Pattern.compile("<#[a-fA-F0-9]{6}>");
+        private static final Pattern PATTERN_1 = Pattern.compile("<color:#[a-fA-F\\d]{6}>");
+        private static final Pattern PATTERN_2 = Pattern.compile("<#[a-fA-F\\d]{6}>");
 
         @Nonnull
         public static String colorize(@Nonnull String message) {
@@ -178,8 +179,7 @@ public enum Color {
         STRIKETHROUGH('m'),
         UNDERLINE('n'),
         ITALIC('o'),
-        RESET('r'),
-        ;
+        RESET('r');
 
         private final char identifier;
 
