@@ -93,7 +93,7 @@ public class Placeholder {
         }
 
         static {
-            register(new Placeholder("nl", "\n"));
+            register(new Placeholder("nl", System.lineSeparator()));
             register(new Placeholder("prefix", SystemMessageKey.PREFIX.message()));
             register(new Placeholder("time", () -> new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime())));
             register(new Placeholder("thread", () -> {

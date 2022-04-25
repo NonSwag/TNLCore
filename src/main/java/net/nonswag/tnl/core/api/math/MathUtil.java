@@ -1,23 +1,12 @@
 package net.nonswag.tnl.core.api.math;
 
+import javax.annotation.Nonnull;
 import java.util.Random;
 
 public class MathUtil {
 
-    public static boolean isInLine(int line, int i) {
-        return i % line == 0;
-    }
-
-    public static boolean isInLine(double line, double i) {
-        return i % line == 0;
-    }
-
-    public static boolean isInLine(float line, float i) {
-        return i % line == 0;
-    }
-
-    public static boolean isInLine(long line, long i) {
-        return i % line == 0;
+    public static <N extends Number> boolean isInLine(@Nonnull N line, @Nonnull N number) {
+        return number.doubleValue() % line.doubleValue() == 0;
     }
 
     public static boolean chance(double chance) {
@@ -58,5 +47,15 @@ public class MathUtil {
         double result = number;
         for (double d = number - 1; d > 0; d--) result *= d;
         return (negative ? -result : result);
+    }
+
+    public static boolean isInt(@Nonnull Number number) {
+        return number.longValue() == number.doubleValue() || Math.ceil(number.doubleValue()) == Math.floor(number.doubleValue());
+    }
+
+    public static boolean isPrime(double d) {
+        if (d <= 1 || !isInt(d) || d == 4) return false;
+        for (double i1 = 2; i1 < d / 2; i1++) if (isInt(d / i1)) return false;
+        return true;
     }
 }

@@ -11,11 +11,12 @@ import javax.annotation.Nullable;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Logger extends PrintStream implements Duplicable {
+
+    @Nonnull
+    public static final List<Logger> LOGGERS = new ArrayList<>();
 
     @Nonnull
     public static final Logger info = new Logger("info", SystemMessageKey.LOG_INFO::message, FileDescriptor.out).colorize(Color.LIME, Color.GOLD);
@@ -46,6 +47,7 @@ public class Logger extends PrintStream implements Duplicable {
         this.name = name;
         this.prefix = prefix;
         this.descriptor = descriptor;
+        LOGGERS.add(this);
     }
 
     @Nonnull
@@ -101,7 +103,7 @@ public class Logger extends PrintStream implements Duplicable {
         return setMainColor(mainColor).setSecondaryColor(secondaryColor);
     }
 
-    private synchronized void printStackTrace(@Nonnull Throwable throwable) {
+    private void printStackTrace(@Nonnull Throwable throwable) {
         List<StackTraceElement> trace = Arrays.asList(throwable.getStackTrace());
         for (Throwable t : throwable.getSuppressed()) {
             for (StackTraceElement element : t.getStackTrace()) trace.removeIf(element::equals);
@@ -111,7 +113,7 @@ public class Logger extends PrintStream implements Duplicable {
         if (cause != null) printCause(cause);
     }
 
-    private synchronized void printCause(@Nonnull Throwable cause) {
+    private void printCause(@Nonnull Throwable cause) {
         println("Caused by: " + cause);
         StackTraceElement[] trace = cause.getStackTrace();
         for (StackTraceElement element : trace) println("\tat " + element);
@@ -119,12 +121,6 @@ public class Logger extends PrintStream implements Duplicable {
         for (Throwable element : suppressed) println("Suppressed: \t" + element);
         cause = cause.getCause();
         if (cause != null) printCause(cause);
-    }
-
-
-    @Override
-    public void println() {
-        super.println();
     }
 
     @Override
@@ -168,8 +164,8 @@ public class Logger extends PrintStream implements Duplicable {
     }
 
     @Override
-    public void println(@Nullable Object x) {
-        _println(x);
+    public void println(@Nullable Object o) {
+        _println(o);
     }
 
     public void println(@Nonnull Object... values) {
@@ -177,13 +173,46 @@ public class Logger extends PrintStream implements Duplicable {
     }
 
     @Override
-    public PrintStream append(char c) {
+    public Logger printf(@Nonnull String format, @Nullable Object... args) {
+        super.printf(this.format((Object) format), args);
+        return this;
+    }
+
+    @Override
+    public Logger printf(@Nullable Locale locale, @Nonnull String format, @Nullable Object... args) {
+        super.printf(locale, this.format((Object) format), args);
+        return this;
+    }
+
+    @Override
+    public Logger format(@Nonnull String format, @Nullable Object... args) {
+        return (Logger) super.format(format, args);
+    }
+
+    @Override
+    public Logger format(@Nullable Locale locale, @Nonnull String format, @Nullable Object... args) {
+        return (Logger) super.format(locale, format, args);
+    }
+
+    @Override
+    public Logger append(char c) {
         println(c);
         return this;
     }
 
-    private synchronized void _println(@Nonnull Object... values) {
-        if (!getCondition().check()) return;
+    @Override
+    public Logger append(@Nullable CharSequence csq) {
+        return (Logger) super.append(csq);
+    }
+
+    @Override
+    public Logger append(@Nullable CharSequence csq, int start, int end) {
+        return (Logger) super.append(csq, start, end);
+    }
+
+    @Nonnull
+    private String format(@Nonnull Object... values) {
+        StringBuilder message = new StringBuilder();
         for (@Nullable Object value : values) {
             if (value == null) continue;
             if (value instanceof Throwable throwable) {
@@ -200,10 +229,16 @@ public class Logger extends PrintStream implements Duplicable {
                         replace("<", "§8<%1%").replace("»", "§8»%1%").replace("«", "§8«%1%").
                         replace("%1%", getMainColor().getCode()).replace("%2%", getSecondaryColor().getCode());
                 String prefix = Color.replace(getPrefix().get());
-                if (prefix.isEmpty()) super.println(Message.format(Color.replace(text + "§r")));
-                else super.println(Color.replace(Message.format(prefix + " " + text + "§r")));
+                if (prefix.isEmpty()) message.append(Message.format(Color.replace(text + "§r")));
+                else message.append(Color.replace(Message.format(prefix + " " + text + "§r")));
             }
         }
+        return message.toString();
+    }
+
+    private synchronized void _println(@Nonnull Object... values) {
+        if (!getCondition().check()) return;
+        super.println(format(values));
     }
 
     @Override
