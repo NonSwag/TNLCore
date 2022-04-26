@@ -53,8 +53,12 @@ public class MathUtil {
         return number.longValue() == number.doubleValue() || Math.ceil(number.doubleValue()) == Math.floor(number.doubleValue());
     }
 
+    public static boolean isEven(double d) {
+        return !isInt(d) && isInt((long) d / 2d);
+    }
+
     public static boolean isPrime(double d) {
-        if (d <= 1 || !isInt(d) || d == 4) return false;
+        if (d <= 1 || isEven(d)) return false;
         for (double i1 = 2; i1 < d / 2; i1++) if (isInt(d / i1)) return false;
         return true;
     }
