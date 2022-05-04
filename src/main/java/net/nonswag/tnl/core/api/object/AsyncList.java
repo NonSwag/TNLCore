@@ -82,7 +82,6 @@ public class AsyncList<E> implements Iterable<E> {
             return index < size;
         }
 
-        @Nullable
         @Override
         public E next() {
             if (index >= size) throw new NoSuchElementException();
