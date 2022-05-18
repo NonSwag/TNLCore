@@ -20,10 +20,12 @@ public class TextFile extends Loadable implements Saveable, Deletable {
 
     public TextFile(@Nonnull String file) {
         super(file);
+        load();
     }
 
     public TextFile(@Nonnull String path, @Nonnull String file) {
         super(path, file);
+        load();
     }
 
     public TextFile(@Nonnull File file) {
