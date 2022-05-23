@@ -134,17 +134,12 @@ public final class Reflection {
     }
 
     @Nonnull
-    public static Objects<?> getField(@Nonnull Object object, @Nonnull String field) {
-        return getField(object, Object.class, field);
+    public static <P> Objects<P> getField(@Nonnull Object object, @Nonnull String field) {
+        return getField(object, object.getClass(), field);
     }
 
     @Nonnull
-    public static <P> Objects<P> getField(@Nonnull Object object, @Nonnull Class<? extends P> parameter, @Nonnull String field) {
-        return getField(object, object.getClass(), parameter, field);
-    }
-
-    @Nonnull
-    public static <P> Objects<P> getField(@Nonnull Object object, @Nonnull Class<?> superclass, @Nonnull Class<? extends P> parameter, @Nonnull String field) {
+    public static <P> Objects<P> getField(@Nonnull Object object, @Nonnull Class<?> superclass, @Nonnull String field) {
         try {
             Field declaredField = superclass.getDeclaredField(field);
             declaredField.setAccessible(true);
@@ -183,12 +178,7 @@ public final class Reflection {
     }
 
     @Nonnull
-    public static Objects<?> getStaticField(@Nonnull Class<?> clazz, @Nonnull String field) {
-        return getStaticField(clazz, Object.class, field);
-    }
-
-    @Nonnull
-    public static <P> Objects<P> getStaticField(@Nonnull Class<?> clazz, @Nonnull Class<? extends P> parameter, @Nonnull String field) {
+    public static <P> Objects<P> getStaticField(@Nonnull Class<?> clazz, @Nonnull String field) {
         try {
             Field declaredField = clazz.getDeclaredField(field);
             declaredField.setAccessible(true);
@@ -245,7 +235,7 @@ public final class Reflection {
                 JsonObject o = new JsonObject();
                 for (Class<?> clazz : getConnectingClasses(object.getClass())) {
                     for (String field : getFields(clazz)) {
-                        addFields(o, field, getField(object, clazz, Object.class, field).getValue());
+                        addFields(o, field, getField(object, clazz, field).getValue());
                     }
                 }
                 jsonObject.add(name, o);
