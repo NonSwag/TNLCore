@@ -1,5 +1,6 @@
 package net.nonswag.tnl.core.api.file.formats;
 
+import lombok.Getter;
 import net.nonswag.tnl.core.api.file.Deletable;
 import net.nonswag.tnl.core.api.file.Loadable;
 import net.nonswag.tnl.core.api.file.Saveable;
@@ -12,6 +13,7 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+@Getter
 public class TextFile extends Loadable implements Saveable, Deletable {
 
     @Nonnull
@@ -34,24 +36,15 @@ public class TextFile extends Loadable implements Saveable, Deletable {
     }
 
     @Nonnull
-    public final TextFile setContent(@Nonnull String[] content) {
+    public final <F extends TextFile> F setContent(@Nonnull String[] content) {
         this.content = content;
-        return this;
+        return (F) this;
     }
 
     @Nonnull
-    public final String[] getContent() {
-        return content;
-    }
-
-    @Nonnull
-    public TextFile setSort(boolean sort) {
+    public <F extends TextFile> F setSort(boolean sort) {
         this.sort = sort;
-        return this;
-    }
-
-    public boolean isSort() {
-        return sort;
+        return (F) this;
     }
 
     @Nonnull

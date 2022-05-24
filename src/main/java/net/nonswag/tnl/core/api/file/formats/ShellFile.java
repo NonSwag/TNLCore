@@ -1,5 +1,6 @@
 package net.nonswag.tnl.core.api.file.formats;
 
+import lombok.Getter;
 import net.nonswag.tnl.core.api.message.Placeholder;
 
 import javax.annotation.Nonnull;
@@ -7,6 +8,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class ShellFile extends TextFile {
 
     @Nonnull
@@ -36,11 +38,6 @@ public class ShellFile extends TextFile {
     @Override
     public final ShellFile setSort(boolean sort) {
         return this;
-    }
-
-    @Nonnull
-    public List<Placeholder> getPlaceholders() {
-        return placeholders;
     }
 
     @Nonnull

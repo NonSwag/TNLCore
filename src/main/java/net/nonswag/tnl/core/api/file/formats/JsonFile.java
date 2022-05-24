@@ -4,6 +4,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import lombok.Getter;
+import lombok.Setter;
 import net.nonswag.tnl.core.api.file.Deletable;
 import net.nonswag.tnl.core.api.file.Loadable;
 import net.nonswag.tnl.core.api.file.Saveable;
@@ -16,6 +18,8 @@ import javax.annotation.Nonnull;
 import java.io.*;
 import java.util.Objects;
 
+@Getter
+@Setter
 public class JsonFile extends Loadable implements Saveable, Deletable {
 
     @Nonnull
@@ -34,15 +38,6 @@ public class JsonFile extends Loadable implements Saveable, Deletable {
     public JsonFile(@Nonnull File file) {
         super(file);
         load();
-    }
-
-    public final void setJsonElement(@Nonnull JsonElement jsonElement) {
-        this.jsonElement = jsonElement;
-    }
-
-    @Nonnull
-    public final JsonElement getJsonElement() {
-        return jsonElement;
     }
 
     @Nonnull

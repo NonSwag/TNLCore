@@ -1,5 +1,7 @@
 package net.nonswag.tnl.core.api.file.formats;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.nonswag.tnl.core.api.file.Deletable;
 import net.nonswag.tnl.core.api.file.Loadable;
 import net.nonswag.tnl.core.api.file.Saveable;
@@ -13,13 +15,14 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.util.*;
 
+@Getter
+@Setter
 public class PropertyFile extends Loadable implements Saveable, Deletable {
 
     @Nonnull
-    private final HashMap<String, String> values = new HashMap<>();
+    private final TreeMap<String, String> values = new TreeMap<>();
     @Nonnull
-    private List<String> comments = new ArrayList<>();
-    private boolean sort = false;
+    private TreeSet<String> comments = new TreeSet<>();
 
     public PropertyFile(@Nonnull String file) {
         super(file);
@@ -36,43 +39,24 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
         load();
     }
 
-    @Nonnull
-    public final List<String> getComments() {
-        return comments;
-    }
-
-    public final void setComments(@Nonnull List<String> comments) {
-        this.comments = comments;
-    }
-
-    public final void addComment(@Nonnull String comment) {
+    public void addComment(@Nonnull String comment) {
         getComments().add(comment);
     }
 
-    public final void addCommentIfAbsent(@Nonnull String comment) {
+    public void addCommentIfAbsent(@Nonnull String comment) {
         if (!hasComment(comment)) addComment(comment);
     }
 
-    public final void removeComment(@Nonnull String comment) {
+    public void removeComment(@Nonnull String comment) {
         getComments().removeIf((s) -> s.equals(comment));
     }
 
-    public final boolean hasComment(@Nonnull String comment) {
+    public boolean hasComment(@Nonnull String comment) {
         return getComments().contains(comment);
     }
 
     @Nonnull
-    public final PropertyFile setSort(boolean sort) {
-        this.sort = sort;
-        return this;
-    }
-
-    public final boolean isSort() {
-        return sort;
-    }
-
-    @Nonnull
-    protected String getDelimeter() {
+    public String getDelimiter() {
         return "=";
     }
 
@@ -83,13 +67,12 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), getCharset()))) {
             getValues().clear();
             reader.lines().forEach(s -> {
-                if (s.startsWith("#")) this.getComments().add(s.substring(1));
-                else {
-                    List<String> split = Arrays.asList(s.split(this.getDelimeter()));
+                if (!s.startsWith("#")) {
+                    List<String> split = Arrays.asList(s.split(this.getDelimiter()));
                     if (split.size() >= 1 && !split.get(0).isEmpty()) {
-                        getValues().put(split.get(0), String.join(getDelimeter(), split.subList(1, split.size())));
+                        getValues().put(split.get(0), String.join(getDelimiter(), split.subList(1, split.size())));
                     }
-                }
+                } else this.getComments().add(s.substring(1));
             });
             save();
         } catch (Exception e) {
@@ -113,9 +96,9 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
             });
             getValues().forEach((key, value) -> {
                 try {
-                    writer.write((key + this.getDelimeter() + value).replace("\n", "\\n") + "\n");
+                    writer.write((key + this.getDelimiter() + value).replace("\n", "\\n") + "\n");
                 } catch (IOException e) {
-                    Logger.error.println("Failed to save a property", "content: <'" + key + getDelimeter() + value + "'>", e);
+                    Logger.error.println("Failed to save a property", "content: <'" + key + getDelimiter() + value + "'>", e);
                 }
             });
         } catch (Exception var6) {
@@ -278,7 +261,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
     }
 
     @Nonnull
-    public final HashMap<String, String> getValues() {
+    public final TreeMap<String, String> getValues() {
         return values;
     }
 }

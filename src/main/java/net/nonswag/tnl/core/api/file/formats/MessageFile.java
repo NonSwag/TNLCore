@@ -29,50 +29,50 @@ public class MessageFile extends PropertyFile {
         this(path, language.name().toLowerCase().replace(" ", "-"), language);
     }
 
-    public final void setDefault(@Nonnull Key key, @Nonnull String message) {
+    public void setDefault(@Nonnull Key key, @Nonnull String message) {
         setDefault(key.getKey(), message);
     }
 
-    public final void setDefault(@Nonnull String key, @Nonnull String message) {
+    public void setDefault(@Nonnull String key, @Nonnull String message) {
         setValueIfAbsent(key, message);
     }
 
-    public final void setMessage(@Nonnull Key key, @Nonnull String message) {
+    public void setMessage(@Nonnull Key key, @Nonnull String message) {
         setMessage(key.getKey(), message);
     }
 
-    public final void setMessage(@Nonnull String key, @Nonnull String message) {
+    public void setMessage(@Nonnull String key, @Nonnull String message) {
         setValue(key, message);
     }
 
     @Nullable
-    public final String getMessage(@Nonnull Key key) {
+    public String getMessage(@Nonnull Key key) {
         return getMessage(key.getKey());
     }
 
     @Nullable
-    public final String getMessage(@Nonnull String key) {
+    public String getMessage(@Nonnull String key) {
         return getString(key);
     }
 
     @Nonnull
-    public final String getMessage(@Nonnull Key key, @Nonnull String defaultValue) {
+    public String getMessage(@Nonnull Key key, @Nonnull String defaultValue) {
         return getOrDefault(key.getKey(), defaultValue);
     }
 
     @Nonnull
-    public final String getMessage(@Nonnull String key, @Nonnull String defaultValue) {
+    public String getMessage(@Nonnull String key, @Nonnull String defaultValue) {
         String message = getMessage(key);
         return message != null ? message : defaultValue;
     }
 
     @Nonnull
-    public final MessageFile register() {
+    public MessageFile register() {
         getList().putIfAbsent(this.getLanguage(), this);
         return this;
     }
 
-    public final void unregister() {
+    public void unregister() {
         getList().remove(this.getLanguage(), this);
     }
 
