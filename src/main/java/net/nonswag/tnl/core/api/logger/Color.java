@@ -1,9 +1,12 @@
 package net.nonswag.tnl.core.api.logger;
 
+import lombok.Getter;
+
 import javax.annotation.Nonnull;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Getter
 public enum Color {
     BOLD_BLACK("\033[1;30m", "§o§l"),
     BOLD_RED("\033[1;31m", "§c§l"),
@@ -80,16 +83,6 @@ public enum Color {
         this.code = code;
     }
 
-    @Nonnull
-    public String getAnsi() {
-        return ansi;
-    }
-
-    @Nonnull
-    public String getCode() {
-        return code;
-    }
-
     @Override
     public String toString() {
         return getAnsi();
@@ -157,6 +150,7 @@ public enum Color {
         }
     }
 
+    @Getter
     public enum Minecraft {
         BLACK('0'),
         DARK_BLUE('1'),
@@ -174,21 +168,26 @@ public enum Color {
         LIGHT_PURPLE('d'),
         YELLOW('e'),
         WHITE('f'),
-        MATRIX('k'),
-        BOLD('l'),
-        STRIKETHROUGH('m'),
-        UNDERLINE('n'),
-        ITALIC('o'),
-        RESET('r');
+        MATRIX('k', true),
+        BOLD('l', true),
+        STRIKETHROUGH('m', true),
+        UNDERLINE('n', true),
+        ITALIC('o', true),
+        RESET('r', true);
 
+        @Nonnull
+        private final String name;
         private final char identifier;
+        private final boolean formatter;
 
         Minecraft(char identifier) {
-            this.identifier = identifier;
+            this(identifier, false);
         }
 
-        public char getIdentifier() {
-            return identifier;
+        Minecraft(char identifier, boolean formatter) {
+            this.identifier = identifier;
+            this.name = name().toLowerCase();
+            this.formatter = formatter;
         }
 
         @Nonnull
