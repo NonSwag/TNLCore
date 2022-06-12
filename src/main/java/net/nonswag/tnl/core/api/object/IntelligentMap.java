@@ -7,6 +7,21 @@ import java.util.function.BiFunction;
 
 public abstract class IntelligentMap<K, V> extends HashMap<K, V> {
 
+    public IntelligentMap(int initialCapacity, float loadFactor) {
+        super(initialCapacity, loadFactor);
+    }
+
+    public IntelligentMap(int initialCapacity) {
+        super(initialCapacity);
+    }
+
+    public IntelligentMap() {
+    }
+
+    public IntelligentMap(Map<? extends K, ? extends V> m) {
+        super(m);
+    }
+
     public abstract void update();
 
     @Override
