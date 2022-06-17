@@ -6,12 +6,13 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
+import net.nonswag.tnl.core.api.errors.file.FileLoadException;
+import net.nonswag.tnl.core.api.errors.file.FileSaveException;
 import net.nonswag.tnl.core.api.file.Deletable;
 import net.nonswag.tnl.core.api.file.Loadable;
 import net.nonswag.tnl.core.api.file.Saveable;
 import net.nonswag.tnl.core.api.file.helper.FileHelper;
 import net.nonswag.tnl.core.api.file.helper.JsonHelper;
-import net.nonswag.tnl.core.api.logger.Logger;
 import net.nonswag.tnl.core.utils.LinuxUtil;
 
 import javax.annotation.Nonnull;
@@ -42,27 +43,26 @@ public class JsonFile extends Loadable implements Saveable, Deletable {
 
     @Nonnull
     @Override
-    protected final JsonFile load() {
-        FileHelper.createSilent(getFile());
+    protected final JsonFile load() throws FileLoadException {
+        FileHelper.create(getFile());
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), getCharset()))) {
             jsonElement = JsonHelper.parse(reader);
             if (jsonElement instanceof JsonNull) this.jsonElement = new JsonObject();
             save();
         } catch (Exception e) {
             LinuxUtil.Suppressed.runShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
-            Logger.error.println("Failed to load file <'" + getFile().getAbsolutePath() + "'>", "Creating Backup of the old file");
-        } finally {
-            if (!isValid()) Logger.error.println("The file <'" + getFile().getAbsolutePath() + "'> is invalid");
+            throw new FileLoadException(e);
         }
+        if (!isValid()) throw new FileLoadException("file is invalid");
         return this;
     }
 
     @Override
-    public final void save() {
+    public final void save() throws FileSaveException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(getFile()), getCharset()))) {
             writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(getJsonElement()));
         } catch (Exception e) {
-            Logger.error.println("Failed to save file <'" + getFile().getAbsolutePath() + "'>", e.getMessage());
+            throw new FileSaveException(e);
         }
     }
 

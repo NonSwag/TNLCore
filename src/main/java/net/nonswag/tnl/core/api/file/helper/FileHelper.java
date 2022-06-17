@@ -1,6 +1,9 @@
 package net.nonswag.tnl.core.api.file.helper;
 
-import net.nonswag.tnl.core.api.logger.Logger;
+import net.nonswag.tnl.core.api.errors.file.FileCreateException;
+import net.nonswag.tnl.core.api.errors.file.FileDeleteException;
+import net.nonswag.tnl.core.api.errors.file.FileException;
+import net.nonswag.tnl.core.api.errors.file.FileLinkException;
 import net.nonswag.tnl.core.utils.LinuxUtil;
 
 import javax.annotation.Nonnull;
@@ -16,72 +19,69 @@ public final class FileHelper {
     private FileHelper() {
     }
 
-    public static void create(@Nonnull File directory, @Nonnull File file) throws IOException {
-        create(directory);
+    public static void create(@Nonnull File directory, @Nonnull File file) throws FileCreateException {
+        createDirectory(directory);
         create(file);
     }
 
-    public static void create(@Nonnull File file) throws IOException {
-        if (file.exists()) return;
-        if (!file.getName().contains(".")) file.getAbsoluteFile().mkdirs();
-        else {
-            file.getAbsoluteFile().getParentFile().mkdirs();
-            if (!file.createNewFile()) throw new FileNotFoundException("Couldn't generate file");
-        }
-    }
-
-    public static void createSilent(@Nonnull File file) {
+    public static boolean createDirectory(@Nonnull File directory) throws FileCreateException {
         try {
-            create(file);
-        } catch (IOException e) {
-            Logger.error.println("Failed to create file <'" + file.getAbsolutePath() + "'>", e);
+            if (directory.exists()) return true;
+            directory.getAbsoluteFile().mkdirs();
+            return directory.exists();
+        } catch (Exception e) {
+            throw new FileCreateException(e);
         }
     }
 
-    public static void createLink(@Nonnull File from, @Nonnull File to) {
+    public static boolean createFile(@Nonnull File file) throws FileCreateException {
+        try {
+            file.getAbsoluteFile().getParentFile().mkdirs();
+            file.createNewFile();
+            return file.exists();
+        } catch (IOException e) {
+            throw new FileCreateException(e);
+        }
+    }
+
+    public static boolean create(@Nonnull File file) throws FileCreateException {
+        return file.getName().contains(".") ? createFile(file) : createDirectory(file);
+    }
+
+    public static void createLink(@Nonnull File from, @Nonnull File to) throws FileLinkException {
         try {
             from = from.getAbsoluteFile();
             to = to.getAbsoluteFile();
             if (!from.exists()) Files.createSymbolicLink(from.toPath(), to.toPath());
         } catch (IOException e) {
-            Logger.error.println("Failed to create link between <'" + from.getAbsolutePath() + "'> and <'" + to.getAbsoluteFile() + "'>", e);
+            throw new FileLinkException(e);
         }
     }
 
-    public static void deleteDirectory(@Nonnull File directory, int tries) {
-        for (int i = 0; i < tries && directory.exists(); i++) deleteContentAndSelf(directory);
+
+    private static boolean delete(@Nonnull File file) throws FileDeleteException {
+        try {
+            if (!file.exists()) return true;
+            if (file.isDirectory()) LinuxUtil.runShellCommand("rm -r " + file.getAbsolutePath());
+            else return file.delete();
+        } catch (IOException | InterruptedException e) {
+            throw new FileDeleteException(e);
+        }
+        return file.exists();
     }
 
-    public static void deleteDirectory(@Nonnull File directory) {
-        deleteDirectory(directory, 1);
-    }
-
-    private static void deleteContentAndSelf(@Nonnull File directory) {
-        if (directory.isDirectory()) {
-            File[] files = directory.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isDirectory()) deleteContentAndSelf(file);
-                    else LinuxUtil.Suppressed.runShellCommand("rm " + file.getAbsolutePath());
-                }
-            }
-            LinuxUtil.Suppressed.runShellCommand("rmdir " + directory.getAbsolutePath());
-        } else LinuxUtil.Suppressed.runShellCommand("rm " + directory.getAbsolutePath());
-    }
-
-    public static void copyResourceFile(@Nonnull Class<?> clazz, @Nonnull String resource, @Nonnull String destination, boolean override) {
-        File to = new File(destination).getAbsoluteFile();
-        FileHelper.createSilent(to);
-        File file = new File(to, new File(resource).getName());
-        if (override || !file.exists()) {
+    public static boolean copyResourceFile(@Nonnull Class<?> clazz, @Nonnull String resource, @Nonnull String destination, boolean override) throws FileException {
+        try {
+            File to = new File(destination).getAbsoluteFile();
+            FileHelper.createDirectory(to);
+            File file = new File(to, new File(resource).getName());
+            if (file.exists() && !override) return true;
             InputStream from = clazz.getClassLoader().getResourceAsStream(resource);
-            if (from != null) {
-                try {
-                    Files.copy(from, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else System.err.println("resource file not found (" + resource + ")");
+            if (from != null) Files.copy(from, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            else throw new FileNotFoundException("resource file not found (" + resource + ")");
+        } catch (IOException e) {
+            throw new FileCreateException(e);
         }
+        return true;
     }
 }

@@ -1,6 +1,8 @@
 package net.nonswag.tnl.core.api.file.formats;
 
 import lombok.Getter;
+import net.nonswag.tnl.core.api.errors.file.FileLoadException;
+import net.nonswag.tnl.core.api.errors.file.FileSaveException;
 import net.nonswag.tnl.core.api.file.Deletable;
 import net.nonswag.tnl.core.api.file.Loadable;
 import net.nonswag.tnl.core.api.file.Saveable;
@@ -49,8 +51,8 @@ public class TextFile extends Loadable implements Saveable, Deletable {
 
     @Nonnull
     @Override
-    protected TextFile load() {
-        FileHelper.createSilent(this.getFile());
+    protected TextFile load() throws FileLoadException {
+        FileHelper.create(this.getFile());
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(this.getFile()), getCharset()))) {
             Object[] array = reader.lines().toArray();
             setContent(new String[array.length]);
@@ -58,17 +60,14 @@ public class TextFile extends Loadable implements Saveable, Deletable {
             save();
         } catch (Exception e) {
             LinuxUtil.Suppressed.runShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
-            Logger.error.println("Failed to load file <'" + getFile().getAbsolutePath() + "'>", "Creating Backup of the old file", e);
-        } finally {
-            if (!this.isValid()) {
-                Logger.error.println("The file <'" + getFile().getAbsolutePath() + "'> is invalid");
-            }
+            throw new FileLoadException(e);
         }
+        if (!isValid()) throw new FileLoadException("file is invalid");
         return this;
     }
 
     @Override
-    public void save() {
+    public void save() throws FileSaveException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(getFile()), getCharset()))) {
             Stream<String> stream = Arrays.stream(getContent());
             if (this.isSort()) stream = stream.sorted();
@@ -80,7 +79,7 @@ public class TextFile extends Loadable implements Saveable, Deletable {
                 }
             });
         } catch (Exception e) {
-            Logger.error.println("Failed to save file <'" + getFile().getAbsolutePath() + "'>", e);
+            throw new FileSaveException(e);
         }
     }
 

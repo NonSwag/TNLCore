@@ -2,6 +2,8 @@ package net.nonswag.tnl.core.api.file.formats;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.nonswag.tnl.core.api.errors.file.FileLoadException;
+import net.nonswag.tnl.core.api.errors.file.FileSaveException;
 import net.nonswag.tnl.core.api.file.Deletable;
 import net.nonswag.tnl.core.api.file.Loadable;
 import net.nonswag.tnl.core.api.file.Saveable;
@@ -62,30 +64,29 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
 
     @Nonnull
     @Override
-    protected final PropertyFile load() {
-        FileHelper.createSilent(getFile());
+    protected final PropertyFile load() throws FileLoadException {
+        FileHelper.create(getFile());
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), getCharset()))) {
             getValues().clear();
             reader.lines().forEach(s -> {
                 if (!s.startsWith("#")) {
-                    List<String> split = Arrays.asList(s.split(this.getDelimiter()));
+                    List<String> split = Arrays.asList(s.split(getDelimiter()));
                     if (split.size() >= 1 && !split.get(0).isEmpty()) {
                         getValues().put(split.get(0), String.join(getDelimiter(), split.subList(1, split.size())));
                     }
-                } else this.getComments().add(s.substring(1));
+                } else getComments().add(s.substring(1));
             });
             save();
         } catch (Exception e) {
             LinuxUtil.Suppressed.runShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
-            e.printStackTrace();
-        } finally {
-            if (!isValid()) Logger.error.println("The file <'" + getFile().getAbsolutePath() + "'> is invalid");
+            throw new FileLoadException(e);
         }
+        if (!isValid()) throw new FileLoadException("file is invalid");
         return this;
     }
 
     @Override
-    public final void save() {
+    public final void save() throws FileSaveException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(getFile(), getCharset()))) {
             getComments().forEach((comment) -> {
                 try {
@@ -101,8 +102,8 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
                     Logger.error.println("Failed to save a property", "content: <'" + key + getDelimiter() + value + "'>", e);
                 }
             });
-        } catch (Exception var6) {
-            Logger.error.println("Failed to save file <'" + getFile().getAbsolutePath() + "'>", var6);
+        } catch (Exception e) {
+            throw new FileSaveException(e);
         }
     }
 

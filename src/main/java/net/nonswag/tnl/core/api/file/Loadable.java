@@ -1,5 +1,7 @@
 package net.nonswag.tnl.core.api.file;
 
+import net.nonswag.tnl.core.api.errors.file.FileLoadException;
+
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.nio.charset.Charset;
@@ -15,7 +17,7 @@ public abstract class Loadable {
     }
 
     protected Loadable(@Nonnull String path, @Nonnull String file) {
-        this(new File(new File(path), file));
+        this(new File(path, file));
     }
 
     protected Loadable(@Nonnull File file) {
@@ -23,7 +25,7 @@ public abstract class Loadable {
     }
 
     @Nonnull
-    protected abstract Loadable load();
+    protected abstract Loadable load() throws FileLoadException;
 
     @Nonnull
     public Charset getCharset() {
