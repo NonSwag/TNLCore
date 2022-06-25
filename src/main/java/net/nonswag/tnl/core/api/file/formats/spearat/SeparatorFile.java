@@ -76,7 +76,6 @@ public abstract class SeparatorFile extends Loadable implements Saveable, Deleta
             reader.lines().forEach(s -> {
                 if (!s.isEmpty()) getEntries().add(Arrays.asList(s.split(getDelimiter())));
             });
-            save();
         } catch (Exception e) {
             LinuxUtil.Suppressed.runShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
             throw new FileLoadException(e);

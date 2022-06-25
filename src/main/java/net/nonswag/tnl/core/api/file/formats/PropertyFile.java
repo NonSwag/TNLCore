@@ -76,7 +76,6 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
                     }
                 } else getComments().add(s.substring(1));
             });
-            save();
         } catch (Exception e) {
             LinuxUtil.Suppressed.runShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
             throw new FileLoadException(e);

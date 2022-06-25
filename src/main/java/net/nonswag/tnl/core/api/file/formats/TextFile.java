@@ -57,7 +57,6 @@ public class TextFile extends Loadable implements Saveable, Deletable {
             Object[] array = reader.lines().toArray();
             setContent(new String[array.length]);
             for (int i = 0; i < array.length; i++) getContent()[i] = (String) array[i];
-            save();
         } catch (Exception e) {
             LinuxUtil.Suppressed.runShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
             throw new FileLoadException(e);

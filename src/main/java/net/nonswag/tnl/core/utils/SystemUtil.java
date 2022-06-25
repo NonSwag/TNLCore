@@ -21,6 +21,27 @@ public class SystemUtil {
         LINUX,
         SUNOS,
         MAC,
-        WINDOWS
+        WINDOWS;
+
+        public boolean isLinux() {
+            return equals(LINUX);
+        }
+
+        public boolean isSunOS() {
+            return equals(SUNOS);
+        }
+
+        public boolean isMac() {
+            return equals(MAC);
+        }
+
+        public boolean isWindows() {
+            return equals(WINDOWS);
+        }
+
+        public boolean isUnknown() {
+            return equals(UNKNOWN);
+        }
+
     }
 }

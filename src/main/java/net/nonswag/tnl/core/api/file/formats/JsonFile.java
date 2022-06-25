@@ -48,7 +48,6 @@ public class JsonFile extends Loadable implements Saveable, Deletable {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), getCharset()))) {
             jsonElement = JsonHelper.parse(reader);
             if (jsonElement instanceof JsonNull) this.jsonElement = new JsonObject();
-            save();
         } catch (Exception e) {
             LinuxUtil.Suppressed.runShellCommand("cp " + getFile().getName() + " broken-" + getFile().getName(), getFile().getAbsoluteFile().getParentFile());
             throw new FileLoadException(e);
