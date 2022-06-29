@@ -43,7 +43,7 @@ public class JsonFile extends Loadable implements Saveable, Deletable {
 
     @Nonnull
     @Override
-    protected final JsonFile load() throws FileLoadException {
+    protected JsonFile load() throws FileLoadException {
         FileHelper.create(getFile());
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), getCharset()))) {
             jsonElement = JsonHelper.parse(reader);
@@ -57,7 +57,7 @@ public class JsonFile extends Loadable implements Saveable, Deletable {
     }
 
     @Override
-    public final void save() throws FileSaveException {
+    public void save() throws FileSaveException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new PrintStream(getFile()), getCharset()))) {
             writer.write(new GsonBuilder().setPrettyPrinting().create().toJson(getJsonElement()));
         } catch (Exception e) {
