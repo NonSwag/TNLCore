@@ -79,4 +79,10 @@ public final class StringUtil {
             default -> String.valueOf(i);
         };
     }
+
+    public static boolean isPalindrome(@Nonnull String string) {
+        StringBuilder reversed = new StringBuilder();
+        for (int index = string.length() - 1; index >= 0; index--) reversed.append(string.charAt(index));
+        return string.equals(reversed.toString());
+    }
 }
