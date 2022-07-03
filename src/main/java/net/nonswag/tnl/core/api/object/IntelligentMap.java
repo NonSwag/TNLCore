@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 
+@Deprecated(forRemoval = true)
 public abstract class IntelligentMap<K, V> extends HashMap<K, V> {
 
     public IntelligentMap(int initialCapacity, float loadFactor) {
