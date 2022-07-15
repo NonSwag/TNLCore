@@ -60,7 +60,7 @@ public final class FileHelper {
     }
 
 
-    private static boolean delete(@Nonnull File file) throws FileDeleteException {
+    public static boolean delete(@Nonnull File file) throws FileDeleteException {
         try {
             if (!file.exists()) return true;
             if (file.isDirectory()) return LinuxUtil.runShellCommand("rm -r " + file.getAbsolutePath()) == 0;
