@@ -44,7 +44,7 @@ public class JsonFile extends Loadable implements Saveable, Deletable {
     @Nonnull
     @Override
     protected JsonFile load() throws FileLoadException {
-        FileHelper.create(getFile());
+        FileHelper.createFile(getFile());
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), getCharset()))) {
             jsonElement = JsonHelper.parse(reader);
             if (jsonElement instanceof JsonNull) this.jsonElement = new JsonObject();

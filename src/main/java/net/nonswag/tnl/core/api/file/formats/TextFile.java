@@ -52,7 +52,7 @@ public class TextFile extends Loadable implements Saveable, Deletable {
     @Nonnull
     @Override
     protected TextFile load() throws FileLoadException {
-        FileHelper.create(this.getFile());
+        FileHelper.createFile(this.getFile());
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(this.getFile()), getCharset()))) {
             Object[] array = reader.lines().toArray();
             setContent(new String[array.length]);

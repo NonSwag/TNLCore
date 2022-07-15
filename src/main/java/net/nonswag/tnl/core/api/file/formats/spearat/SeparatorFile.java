@@ -70,7 +70,7 @@ public abstract class SeparatorFile extends Loadable implements Saveable, Deleta
     @Nonnull
     @Override
     protected final SeparatorFile load() throws FileLoadException {
-        FileHelper.create(getFile());
+        FileHelper.createFile(getFile());
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), getCharset()))) {
             getEntries().clear();
             reader.lines().forEach(s -> {

@@ -65,7 +65,7 @@ public class PropertyFile extends Loadable implements Saveable, Deletable {
     @Nonnull
     @Override
     protected PropertyFile load() throws FileLoadException {
-        FileHelper.create(getFile());
+        FileHelper.createFile(getFile());
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), getCharset()))) {
             getValues().clear();
             reader.lines().forEach(s -> {

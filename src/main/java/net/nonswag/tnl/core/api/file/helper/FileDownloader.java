@@ -30,7 +30,7 @@ public final class FileDownloader {
             String fileName = split[1].split(" ")[0];
             InputStream inputStream = connection.getInputStream();
             File file = new File(directory.getAbsolutePath(), fileName);
-            FileHelper.create(file);
+            FileHelper.createFile(file);
             FileOutputStream outputStream = new FileOutputStream(file);
             int bytesRead;
             byte[] buffer = new byte[4096];

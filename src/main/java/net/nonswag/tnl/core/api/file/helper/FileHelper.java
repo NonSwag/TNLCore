@@ -36,7 +36,8 @@ public final class FileHelper {
 
     public static boolean createFile(@Nonnull File file) throws FileCreateException {
         try {
-            file.getAbsoluteFile().getParentFile().mkdirs();
+            file = file.getAbsoluteFile();
+            file.getParentFile().mkdirs();
             file.createNewFile();
             return file.exists();
         } catch (IOException e) {
@@ -62,12 +63,11 @@ public final class FileHelper {
     private static boolean delete(@Nonnull File file) throws FileDeleteException {
         try {
             if (!file.exists()) return true;
-            if (file.isDirectory()) LinuxUtil.runShellCommand("rm -r " + file.getAbsolutePath());
+            if (file.isDirectory()) return LinuxUtil.runShellCommand("rm -r " + file.getAbsolutePath()) == 0;
             else return file.delete();
         } catch (IOException | InterruptedException e) {
             throw new FileDeleteException(e);
         }
-        return file.exists();
     }
 
     public static boolean copyResourceFile(@Nonnull Class<?> clazz, @Nonnull String resource, @Nonnull String destination, boolean override) throws FileException {
@@ -78,7 +78,7 @@ public final class FileHelper {
             if (file.exists() && !override) return true;
             InputStream from = clazz.getClassLoader().getResourceAsStream(resource);
             if (from != null) Files.copy(from, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            else throw new FileNotFoundException("resource file not found (" + resource + ")");
+            else throw new FileNotFoundException("resource file not found (%s)".formatted(resource));
         } catch (IOException e) {
             throw new FileCreateException(e);
         }
